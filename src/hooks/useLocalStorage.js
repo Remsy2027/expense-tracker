@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useRef } from "react";
 
 /**
  * Custom hook for localStorage management with serialization and error handling
@@ -12,13 +12,13 @@ export function useLocalStorage(key, defaultValue = null, options = {}) {
     serialize = JSON.stringify,
     deserialize = JSON.parse,
     onError = console.error,
-    syncAcrossTabs = false
+    syncAcrossTabs = false,
   } = options;
 
   const [storedValue, setStoredValue] = useState(defaultValue);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
-  
+
   // Keep track of the current key
   const currentKey = useRef(key);
 
@@ -26,13 +26,13 @@ export function useLocalStorage(key, defaultValue = null, options = {}) {
   const getValue = useCallback(() => {
     try {
       setError(null);
-      
-      if (typeof window === 'undefined') {
+
+      if (typeof window === "undefined") {
         return defaultValue;
       }
 
       const item = window.localStorage.getItem(key);
-      
+
       if (item === null) {
         return defaultValue;
       }
@@ -46,35 +46,39 @@ export function useLocalStorage(key, defaultValue = null, options = {}) {
   }, [key, defaultValue, deserialize, onError]);
 
   // Function to set value in localStorage
-  const setValue = useCallback((value) => {
-    try {
-      setError(null);
-      
-      // Allow value to be a function so we have the same API as useState
-      const valueToStore = value instanceof Function ? value(storedValue) : value;
-      
-      setStoredValue(valueToStore);
+  const setValue = useCallback(
+    (value) => {
+      try {
+        setError(null);
 
-      if (typeof window !== 'undefined') {
-        if (valueToStore === undefined || valueToStore === null) {
-          window.localStorage.removeItem(key);
-        } else {
-          window.localStorage.setItem(key, serialize(valueToStore));
+        // Allow value to be a function so we have the same API as useState
+        const valueToStore =
+          value instanceof Function ? value(storedValue) : value;
+
+        setStoredValue(valueToStore);
+
+        if (typeof window !== "undefined") {
+          if (valueToStore === undefined || valueToStore === null) {
+            window.localStorage.removeItem(key);
+          } else {
+            window.localStorage.setItem(key, serialize(valueToStore));
+          }
         }
+      } catch (err) {
+        setError(err);
+        onError(err);
       }
-    } catch (err) {
-      setError(err);
-      onError(err);
-    }
-  }, [key, storedValue, serialize, onError]);
+    },
+    [key, storedValue, serialize, onError],
+  );
 
   // Function to remove value from localStorage
   const remove = useCallback(() => {
     try {
       setError(null);
       setStoredValue(defaultValue);
-      
-      if (typeof window !== 'undefined') {
+
+      if (typeof window !== "undefined") {
         window.localStorage.removeItem(key);
       }
     } catch (err) {
@@ -85,7 +89,7 @@ export function useLocalStorage(key, defaultValue = null, options = {}) {
 
   // Function to check if key exists
   const exists = useCallback(() => {
-    if (typeof window === 'undefined') {
+    if (typeof window === "undefined") {
       return false;
     }
     return window.localStorage.getItem(key) !== null;
@@ -94,17 +98,17 @@ export function useLocalStorage(key, defaultValue = null, options = {}) {
   // Initialize value on mount or when key changes
   useEffect(() => {
     setIsLoading(true);
-    
+
     const initialValue = getValue();
     setStoredValue(initialValue);
     setIsLoading(false);
-    
+
     currentKey.current = key;
   }, [key, getValue]);
 
   // Listen for storage changes across tabs (if enabled)
   useEffect(() => {
-    if (!syncAcrossTabs || typeof window === 'undefined') {
+    if (!syncAcrossTabs || typeof window === "undefined") {
       return;
     }
 
@@ -120,10 +124,10 @@ export function useLocalStorage(key, defaultValue = null, options = {}) {
       }
     };
 
-    window.addEventListener('storage', handleStorageChange);
-    
+    window.addEventListener("storage", handleStorageChange);
+
     return () => {
-      window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener("storage", handleStorageChange);
     };
   }, [key, defaultValue, deserialize, onError, syncAcrossTabs]);
 
@@ -140,7 +144,7 @@ export function useLocalStorageState(key, defaultValue = null) {
   return useLocalStorage(key, defaultValue, {
     serialize: JSON.stringify,
     deserialize: JSON.parse,
-    syncAcrossTabs: true
+    syncAcrossTabs: true,
   });
 }
 
@@ -150,10 +154,10 @@ export function useLocalStorageState(key, defaultValue = null) {
  * @param {string} defaultValue - Default value
  * @returns {[value, setValue, remove, isLoading, error]}
  */
-export function useLocalStorageString(key, defaultValue = '') {
+export function useLocalStorageString(key, defaultValue = "") {
   return useLocalStorage(key, defaultValue, {
     serialize: (value) => value,
-    deserialize: (value) => value
+    deserialize: (value) => value,
   });
 }
 
@@ -166,7 +170,7 @@ export function useLocalStorageString(key, defaultValue = '') {
 export function useLocalStorageBoolean(key, defaultValue = false) {
   return useLocalStorage(key, defaultValue, {
     serialize: (value) => String(value),
-    deserialize: (value) => value === 'true'
+    deserialize: (value) => value === "true",
   });
 }
 
@@ -179,7 +183,7 @@ export function useLocalStorageBoolean(key, defaultValue = false) {
 export function useLocalStorageNumber(key, defaultValue = 0) {
   return useLocalStorage(key, defaultValue, {
     serialize: (value) => String(value),
-    deserialize: (value) => Number(value)
+    deserialize: (value) => Number(value),
   });
 }
 
@@ -190,56 +194,76 @@ export function useLocalStorageNumber(key, defaultValue = 0) {
  * @returns {[array, setArray, addItem, removeItem, clear, isLoading, error]}
  */
 export function useLocalStorageArray(key, defaultValue = []) {
-  const [array, setArray, remove, isLoading, error] = useLocalStorage(key, defaultValue);
+  const [array, setArray, remove, isLoading, error] = useLocalStorage(
+    key,
+    defaultValue,
+  );
 
-  const addItem = useCallback((item) => {
-    setArray(currentArray => [...currentArray, item]);
-  }, [setArray]);
+  const addItem = useCallback(
+    (item) => {
+      setArray((currentArray) => [...currentArray, item]);
+    },
+    [setArray],
+  );
 
-  const removeItem = useCallback((indexOrPredicate) => {
-    setArray(currentArray => {
-      if (typeof indexOrPredicate === 'number') {
-        return currentArray.filter((_, index) => index !== indexOrPredicate);
-      } else if (typeof indexOrPredicate === 'function') {
-        return currentArray.filter((item, index) => !indexOrPredicate(item, index));
-      }
-      return currentArray;
-    });
-  }, [setArray]);
-
-  const updateItem = useCallback((indexOrPredicate, newItem) => {
-    setArray(currentArray => {
-      return currentArray.map((item, index) => {
-        if (typeof indexOrPredicate === 'number') {
-          return index === indexOrPredicate ? newItem : item;
-        } else if (typeof indexOrPredicate === 'function') {
-          return indexOrPredicate(item, index) ? newItem : item;
+  const removeItem = useCallback(
+    (indexOrPredicate) => {
+      setArray((currentArray) => {
+        if (typeof indexOrPredicate === "number") {
+          return currentArray.filter((_, index) => index !== indexOrPredicate);
+        } else if (typeof indexOrPredicate === "function") {
+          return currentArray.filter(
+            (item, index) => !indexOrPredicate(item, index),
+          );
         }
-        return item;
+        return currentArray;
       });
-    });
-  }, [setArray]);
+    },
+    [setArray],
+  );
+
+  const updateItem = useCallback(
+    (indexOrPredicate, newItem) => {
+      setArray((currentArray) => {
+        return currentArray.map((item, index) => {
+          if (typeof indexOrPredicate === "number") {
+            return index === indexOrPredicate ? newItem : item;
+          } else if (typeof indexOrPredicate === "function") {
+            return indexOrPredicate(item, index) ? newItem : item;
+          }
+          return item;
+        });
+      });
+    },
+    [setArray],
+  );
 
   const clear = useCallback(() => {
     setArray([]);
   }, [setArray]);
 
-  const insertAt = useCallback((index, item) => {
-    setArray(currentArray => {
-      const newArray = [...currentArray];
-      newArray.splice(index, 0, item);
-      return newArray;
-    });
-  }, [setArray]);
+  const insertAt = useCallback(
+    (index, item) => {
+      setArray((currentArray) => {
+        const newArray = [...currentArray];
+        newArray.splice(index, 0, item);
+        return newArray;
+      });
+    },
+    [setArray],
+  );
 
-  const moveItem = useCallback((fromIndex, toIndex) => {
-    setArray(currentArray => {
-      const newArray = [...currentArray];
-      const [movedItem] = newArray.splice(fromIndex, 1);
-      newArray.splice(toIndex, 0, movedItem);
-      return newArray;
-    });
-  }, [setArray]);
+  const moveItem = useCallback(
+    (fromIndex, toIndex) => {
+      setArray((currentArray) => {
+        const newArray = [...currentArray];
+        const [movedItem] = newArray.splice(fromIndex, 1);
+        newArray.splice(toIndex, 0, movedItem);
+        return newArray;
+      });
+    },
+    [setArray],
+  );
 
   return {
     array,
@@ -252,7 +276,7 @@ export function useLocalStorageArray(key, defaultValue = []) {
     moveItem,
     remove,
     isLoading,
-    error
+    error,
   };
 }
 
@@ -263,32 +287,44 @@ export function useLocalStorageArray(key, defaultValue = []) {
  * @returns {[object, setObject, updateProperty, removeProperty, clear, isLoading, error]}
  */
 export function useLocalStorageObject(key, defaultValue = {}) {
-  const [object, setObject, remove, isLoading, error] = useLocalStorage(key, defaultValue);
+  const [object, setObject, remove, isLoading, error] = useLocalStorage(
+    key,
+    defaultValue,
+  );
 
-  const updateProperty = useCallback((property, value) => {
-    setObject(currentObject => ({
-      ...currentObject,
-      [property]: value
-    }));
-  }, [setObject]);
+  const updateProperty = useCallback(
+    (property, value) => {
+      setObject((currentObject) => ({
+        ...currentObject,
+        [property]: value,
+      }));
+    },
+    [setObject],
+  );
 
-  const removeProperty = useCallback((property) => {
-    setObject(currentObject => {
-      const { [property]: removed, ...rest } = currentObject;
-      return rest;
-    });
-  }, [setObject]);
+  const removeProperty = useCallback(
+    (property) => {
+      setObject((currentObject) => {
+        const { [property]: removed, ...rest } = currentObject;
+        return rest;
+      });
+    },
+    [setObject],
+  );
 
   const clear = useCallback(() => {
     setObject({});
   }, [setObject]);
 
-  const merge = useCallback((newProperties) => {
-    setObject(currentObject => ({
-      ...currentObject,
-      ...newProperties
-    }));
-  }, [setObject]);
+  const merge = useCallback(
+    (newProperties) => {
+      setObject((currentObject) => ({
+        ...currentObject,
+        ...newProperties,
+      }));
+    },
+    [setObject],
+  );
 
   return {
     object,
@@ -299,7 +335,7 @@ export function useLocalStorageObject(key, defaultValue = {}) {
     merge,
     remove,
     isLoading,
-    error
+    error,
   };
 }
 
@@ -331,7 +367,7 @@ export function useLocalStorageCompressed(key, defaultValue = null) {
 
   return useLocalStorage(key, defaultValue, {
     serialize: compress,
-    deserialize: decompress
+    deserialize: decompress,
   });
 }
 
@@ -342,51 +378,62 @@ export function useLocalStorageCompressed(key, defaultValue = null) {
  * @param {number} expirationTime - Time in milliseconds after which the value expires
  * @returns {[value, setValue, remove, isLoading, error, isExpired]}
  */
-export function useLocalStorageWithExpiration(key, defaultValue = null, expirationTime = 24 * 60 * 60 * 1000) {
-  const serialize = useCallback((value) => {
-    return JSON.stringify({
-      value,
-      timestamp: Date.now(),
-      expirationTime
-    });
-  }, [expirationTime]);
+export function useLocalStorageWithExpiration(
+  key,
+  defaultValue = null,
+  expirationTime = 24 * 60 * 60 * 1000,
+) {
+  const serialize = useCallback(
+    (value) => {
+      return JSON.stringify({
+        value,
+        timestamp: Date.now(),
+        expirationTime,
+      });
+    },
+    [expirationTime],
+  );
 
   const deserialize = useCallback((data) => {
     const parsed = JSON.parse(data);
     const { value, timestamp, expirationTime: storedExpirationTime } = parsed;
-    
+
     const isExpired = Date.now() - timestamp > storedExpirationTime;
-    
+
     if (isExpired) {
-      throw new Error('Data expired');
+      throw new Error("Data expired");
     }
-    
+
     return value;
   }, []);
 
-  const [storedValue, setValue, remove, isLoading, error] = useLocalStorage(key, defaultValue, {
-    serialize,
-    deserialize,
-    onError: (err) => {
-      if (err.message === 'Data expired') {
-        // Silently remove expired data
-        if (typeof window !== 'undefined') {
-          window.localStorage.removeItem(key);
+  const [storedValue, setValue, remove, isLoading, error] = useLocalStorage(
+    key,
+    defaultValue,
+    {
+      serialize,
+      deserialize,
+      onError: (err) => {
+        if (err.message === "Data expired") {
+          // Silently remove expired data
+          if (typeof window !== "undefined") {
+            window.localStorage.removeItem(key);
+          }
         }
-      }
-    }
-  });
+      },
+    },
+  );
 
   const checkExpiration = useCallback(() => {
     try {
-      if (typeof window === 'undefined') return false;
-      
+      if (typeof window === "undefined") return false;
+
       const item = window.localStorage.getItem(key);
       if (!item) return false;
-      
+
       const parsed = JSON.parse(item);
       const { timestamp, expirationTime: storedExpirationTime } = parsed;
-      
+
       return Date.now() - timestamp > storedExpirationTime;
     } catch {
       return false;
@@ -416,7 +463,9 @@ export function useMultipleLocalStorage(keyMap, defaultValues = {}) {
       for (const [stateKey, storageKey] of Object.entries(keyMap)) {
         try {
           const item = localStorage.getItem(storageKey);
-          newState[stateKey] = item ? JSON.parse(item) : defaultValues[stateKey];
+          newState[stateKey] = item
+            ? JSON.parse(item)
+            : defaultValues[stateKey];
         } catch (error) {
           newErrors[stateKey] = error;
           newState[stateKey] = defaultValues[stateKey];
@@ -432,29 +481,32 @@ export function useMultipleLocalStorage(keyMap, defaultValues = {}) {
   }, []);
 
   // Update function
-  const updateState = useCallback((updates) => {
-    setState(currentState => {
-      const newState = { ...currentState, ...updates };
-      
-      // Save each updated key to localStorage
-      Object.entries(updates).forEach(([stateKey, value]) => {
-        const storageKey = keyMap[stateKey];
-        if (storageKey) {
-          try {
-            localStorage.setItem(storageKey, JSON.stringify(value));
-          } catch (error) {
-            setErrors(prev => ({ ...prev, [stateKey]: error }));
+  const updateState = useCallback(
+    (updates) => {
+      setState((currentState) => {
+        const newState = { ...currentState, ...updates };
+
+        // Save each updated key to localStorage
+        Object.entries(updates).forEach(([stateKey, value]) => {
+          const storageKey = keyMap[stateKey];
+          if (storageKey) {
+            try {
+              localStorage.setItem(storageKey, JSON.stringify(value));
+            } catch (error) {
+              setErrors((prev) => ({ ...prev, [stateKey]: error }));
+            }
           }
-        }
+        });
+
+        return newState;
       });
-      
-      return newState;
-    });
-  }, [keyMap]);
+    },
+    [keyMap],
+  );
 
   // Clear all function
   const clearAll = useCallback(() => {
-    Object.values(keyMap).forEach(storageKey => {
+    Object.values(keyMap).forEach((storageKey) => {
       localStorage.removeItem(storageKey);
     });
     setState(defaultValues);

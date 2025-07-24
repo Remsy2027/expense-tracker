@@ -1,12 +1,12 @@
-import React, { useState, useMemo } from 'react';
-import { 
-  BarChart, 
-  Bar, 
-  XAxis, 
-  YAxis, 
-  CartesianGrid, 
-  Tooltip, 
-  Legend, 
+import React, { useState, useMemo, X } from "react";
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
   ResponsiveContainer,
   PieChart,
   Pie,
@@ -14,87 +14,99 @@ import {
   LineChart,
   Line,
   AreaChart,
-  Area
-} from 'recharts';
-import { 
-  TrendingUp, 
-  TrendingDown, 
-  PieChart as PieChartIcon, 
-  BarChart3, 
+  Area,
+} from "recharts";
+import {
+  TrendingUp,
+  TrendingDown,
+  PieChart as PieChartIcon,
+  BarChart3,
   Activity,
   Calendar,
   Filter,
   Download,
-  Maximize2
-} from 'lucide-react';
-import { CATEGORIES } from '../../utils/constants';
-import { formatCurrency, calculatePercentageChange } from '../../utils/helpers';
+  Maximize2,
+} from "lucide-react";
+import { CATEGORIES } from "../../utils/constants";
+import { formatCurrency, calculatePercentageChange } from "../../utils/helpers";
 
-const Charts = ({ 
-  calculations, 
-  dailyData, 
+const Charts = ({
+  calculations,
+  dailyData,
   currentDate,
-  timeRange = '7days' 
+  timeRange = "7days",
 }) => {
-  const [selectedChart, setSelectedChart] = useState('overview');
-  const [chartFilter, setChartFilter] = useState('all');
+  const [selectedChart, setSelectedChart] = useState("overview");
+  const [chartFilter, setChartFilter] = useState("all");
   const [showFullscreen, setShowFullscreen] = useState(null);
 
   // Chart data processing
   const chartData = useMemo(() => {
     // Daily overview data
     const dailyOverview = [
-      { name: 'Income', value: calculations.totalIncome, fill: '#10b981' },
-      { name: 'Expenses', value: calculations.totalExpenses, fill: '#ef4444' },
-      { name: 'Balance', value: Math.max(0, calculations.balance), fill: '#3b82f6' }
+      { name: "Income", value: calculations.totalIncome, fill: "#10b981" },
+      { name: "Expenses", value: calculations.totalExpenses, fill: "#ef4444" },
+      {
+        name: "Balance",
+        value: Math.max(0, calculations.balance),
+        fill: "#3b82f6",
+      },
     ];
 
     // Category data with colors
-    const categoryData = Object.entries(calculations.categoryTotals || {}).map(([category, amount]) => {
-      const categoryInfo = CATEGORIES.find(cat => cat.name === category);
-      return {
-        name: category,
-        value: amount,
-        fill: categoryInfo?.color || '#6b7280',
-        percentage: ((amount / calculations.totalExpenses) * 100).toFixed(1)
-      };
-    }).sort((a, b) => b.value - a.value);
+    const categoryData = Object.entries(calculations.categoryTotals || {})
+      .map(([category, amount]) => {
+        const categoryInfo = CATEGORIES.find((cat) => cat.name === category);
+        return {
+          name: category,
+          value: amount,
+          fill: categoryInfo?.color || "#6b7280",
+          percentage: ((amount / calculations.totalExpenses) * 100).toFixed(1),
+        };
+      })
+      .sort((a, b) => b.value - a.value);
 
     // Trend data (last 7 days)
     const trendData = calculations.trendData || [];
 
     // Weekly summary
-    const weeklyData = trendData.map(day => ({
+    const weeklyData = trendData.map((day) => ({
       ...day,
-      net: day.income - day.expenses
+      net: day.income - day.expenses,
     }));
 
     // Monthly comparison (if enough data)
     const monthlyComparison = [];
     const currentMonth = new Date(currentDate).getMonth();
     const currentYear = new Date(currentDate).getFullYear();
-    
+
     for (let i = 2; i >= 0; i--) {
       const monthDate = new Date(currentYear, currentMonth - i, 1);
-      const monthName = monthDate.toLocaleDateString('en-US', { month: 'short' });
-      
+      const monthName = monthDate.toLocaleDateString("en-US", {
+        month: "short",
+      });
+
       let monthIncome = 0;
       let monthExpenses = 0;
-      
+
       Object.entries(dailyData).forEach(([date, data]) => {
         const dateObj = new Date(date);
-        if (dateObj.getMonth() === monthDate.getMonth() && 
-            dateObj.getFullYear() === monthDate.getFullYear()) {
-          monthIncome += data.income?.reduce((sum, item) => sum + item.amount, 0) || 0;
-          monthExpenses += data.expenses?.reduce((sum, item) => sum + item.amount, 0) || 0;
+        if (
+          dateObj.getMonth() === monthDate.getMonth() &&
+          dateObj.getFullYear() === monthDate.getFullYear()
+        ) {
+          monthIncome +=
+            data.income?.reduce((sum, item) => sum + item.amount, 0) || 0;
+          monthExpenses +=
+            data.expenses?.reduce((sum, item) => sum + item.amount, 0) || 0;
         }
       });
-      
+
       monthlyComparison.push({
         month: monthName,
         income: monthIncome,
         expenses: monthExpenses,
-        net: monthIncome - monthExpenses
+        net: monthIncome - monthExpenses,
       });
     }
 
@@ -103,7 +115,7 @@ const Charts = ({
       categoryData,
       trendData,
       weeklyData,
-      monthlyComparison
+      monthlyComparison,
     };
   }, [calculations, dailyData, currentDate]);
 
@@ -115,13 +127,15 @@ const Charts = ({
           <p className="font-medium text-gray-900 mb-2">{label}</p>
           {payload.map((entry, index) => (
             <div key={index} className="flex items-center space-x-2">
-              <div 
-                className="w-3 h-3 rounded-full" 
+              <div
+                className="w-3 h-3 rounded-full"
                 style={{ backgroundColor: entry.color }}
               />
               <span className="text-sm text-gray-600">{entry.dataKey}:</span>
               <span className="font-semibold">
-                {formatter ? formatter(entry.value) : formatCurrency(entry.value)}
+                {formatter
+                  ? formatter(entry.value)
+                  : formatCurrency(entry.value)}
               </span>
             </div>
           ))}
@@ -135,24 +149,28 @@ const Charts = ({
   const chartConfig = {
     margin: { top: 5, right: 30, left: 20, bottom: 5 },
     colors: {
-      income: '#10b981',
-      expenses: '#ef4444',
-      balance: '#3b82f6',
-      net: '#8b5cf6'
-    }
+      income: "#10b981",
+      expenses: "#ef4444",
+      balance: "#3b82f6",
+      net: "#8b5cf6",
+    },
   };
 
   // Chart components
   const DailyOverviewChart = ({ fullscreen = false }) => (
-    <div className={`bg-white rounded-xl shadow-sm border border-gray-200 ${fullscreen ? 'h-96' : 'h-80'}`}>
+    <div
+      className={`bg-white rounded-xl shadow-sm border border-gray-200 ${fullscreen ? "h-96" : "h-80"}`}
+    >
       <div className="p-6 border-b border-gray-200">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-2">
             <BarChart3 className="h-5 w-5 text-gray-500" />
-            <h3 className="text-lg font-semibold text-gray-900">Daily Overview</h3>
+            <h3 className="text-lg font-semibold text-gray-900">
+              Daily Overview
+            </h3>
           </div>
           <button
-            onClick={() => setShowFullscreen('overview')}
+            onClick={() => setShowFullscreen("overview")}
             className="p-2 text-gray-400 hover:text-gray-600 rounded-lg hover:bg-gray-100"
           >
             <Maximize2 className="h-4 w-4" />
@@ -163,21 +181,21 @@ const Charts = ({
         <ResponsiveContainer width="100%" height={fullscreen ? 300 : 200}>
           <BarChart data={chartData.dailyOverview} {...chartConfig}>
             <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
-            <XAxis 
-              dataKey="name" 
+            <XAxis
+              dataKey="name"
               axisLine={false}
               tickLine={false}
-              tick={{ fontSize: 12, fill: '#64748b' }}
+              tick={{ fontSize: 12, fill: "#64748b" }}
             />
-            <YAxis 
+            <YAxis
               axisLine={false}
               tickLine={false}
-              tick={{ fontSize: 12, fill: '#64748b' }}
+              tick={{ fontSize: 12, fill: "#64748b" }}
               tickFormatter={(value) => `₹${value}`}
             />
             <Tooltip content={<CustomTooltip formatter={formatCurrency} />} />
-            <Bar 
-              dataKey="value" 
+            <Bar
+              dataKey="value"
               radius={[4, 4, 0, 0]}
               stroke="#ffffff"
               strokeWidth={2}
@@ -189,15 +207,19 @@ const Charts = ({
   );
 
   const CategoryChart = ({ fullscreen = false }) => (
-    <div className={`bg-white rounded-xl shadow-sm border border-gray-200 ${fullscreen ? 'h-96' : 'h-80'}`}>
+    <div
+      className={`bg-white rounded-xl shadow-sm border border-gray-200 ${fullscreen ? "h-96" : "h-80"}`}
+    >
       <div className="p-6 border-b border-gray-200">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-2">
             <PieChartIcon className="h-5 w-5 text-gray-500" />
-            <h3 className="text-lg font-semibold text-gray-900">Expense Categories</h3>
+            <h3 className="text-lg font-semibold text-gray-900">
+              Expense Categories
+            </h3>
           </div>
           <button
-            onClick={() => setShowFullscreen('categories')}
+            onClick={() => setShowFullscreen("categories")}
             className="p-2 text-gray-400 hover:text-gray-600 rounded-lg hover:bg-gray-100"
           >
             <Maximize2 className="h-4 w-4" />
@@ -222,8 +244,8 @@ const Charts = ({
                 ))}
               </Pie>
               <Tooltip content={<CustomTooltip formatter={formatCurrency} />} />
-              <Legend 
-                verticalAlign="bottom" 
+              <Legend
+                verticalAlign="bottom"
                 height={36}
                 formatter={(value, entry) => (
                   <span style={{ color: entry.color }}>
@@ -246,7 +268,9 @@ const Charts = ({
   );
 
   const TrendChart = ({ fullscreen = false }) => (
-    <div className={`bg-white rounded-xl shadow-sm border border-gray-200 ${fullscreen ? 'h-96' : 'h-80'}`}>
+    <div
+      className={`bg-white rounded-xl shadow-sm border border-gray-200 ${fullscreen ? "h-96" : "h-80"}`}
+    >
       <div className="p-6 border-b border-gray-200">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-2">
@@ -254,7 +278,7 @@ const Charts = ({
             <h3 className="text-lg font-semibold text-gray-900">7-Day Trend</h3>
           </div>
           <button
-            onClick={() => setShowFullscreen('trend')}
+            onClick={() => setShowFullscreen("trend")}
             className="p-2 text-gray-400 hover:text-gray-600 rounded-lg hover:bg-gray-100"
           >
             <Maximize2 className="h-4 w-4" />
@@ -266,25 +290,25 @@ const Charts = ({
           <AreaChart data={chartData.weeklyData} {...chartConfig}>
             <defs>
               <linearGradient id="incomeGradient" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="#10b981" stopOpacity={0.3}/>
-                <stop offset="95%" stopColor="#10b981" stopOpacity={0}/>
+                <stop offset="5%" stopColor="#10b981" stopOpacity={0.3} />
+                <stop offset="95%" stopColor="#10b981" stopOpacity={0} />
               </linearGradient>
               <linearGradient id="expenseGradient" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="#ef4444" stopOpacity={0.3}/>
-                <stop offset="95%" stopColor="#ef4444" stopOpacity={0}/>
+                <stop offset="5%" stopColor="#ef4444" stopOpacity={0.3} />
+                <stop offset="95%" stopColor="#ef4444" stopOpacity={0} />
               </linearGradient>
             </defs>
             <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
-            <XAxis 
+            <XAxis
               dataKey="date"
               axisLine={false}
               tickLine={false}
-              tick={{ fontSize: 12, fill: '#64748b' }}
+              tick={{ fontSize: 12, fill: "#64748b" }}
             />
-            <YAxis 
+            <YAxis
               axisLine={false}
               tickLine={false}
-              tick={{ fontSize: 12, fill: '#64748b' }}
+              tick={{ fontSize: 12, fill: "#64748b" }}
               tickFormatter={(value) => `₹${value}`}
             />
             <Tooltip content={<CustomTooltip formatter={formatCurrency} />} />
@@ -311,15 +335,19 @@ const Charts = ({
   );
 
   const NetBalanceChart = ({ fullscreen = false }) => (
-    <div className={`bg-white rounded-xl shadow-sm border border-gray-200 ${fullscreen ? 'h-96' : 'h-80'}`}>
+    <div
+      className={`bg-white rounded-xl shadow-sm border border-gray-200 ${fullscreen ? "h-96" : "h-80"}`}
+    >
       <div className="p-6 border-b border-gray-200">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-2">
             <TrendingUp className="h-5 w-5 text-gray-500" />
-            <h3 className="text-lg font-semibold text-gray-900">Net Balance Trend</h3>
+            <h3 className="text-lg font-semibold text-gray-900">
+              Net Balance Trend
+            </h3>
           </div>
           <button
-            onClick={() => setShowFullscreen('net')}
+            onClick={() => setShowFullscreen("net")}
             className="p-2 text-gray-400 hover:text-gray-600 rounded-lg hover:bg-gray-100"
           >
             <Maximize2 className="h-4 w-4" />
@@ -330,16 +358,16 @@ const Charts = ({
         <ResponsiveContainer width="100%" height={fullscreen ? 300 : 200}>
           <LineChart data={chartData.weeklyData} {...chartConfig}>
             <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
-            <XAxis 
+            <XAxis
               dataKey="date"
               axisLine={false}
               tickLine={false}
-              tick={{ fontSize: 12, fill: '#64748b' }}
+              tick={{ fontSize: 12, fill: "#64748b" }}
             />
-            <YAxis 
+            <YAxis
               axisLine={false}
               tickLine={false}
-              tick={{ fontSize: 12, fill: '#64748b' }}
+              tick={{ fontSize: 12, fill: "#64748b" }}
               tickFormatter={(value) => `₹${value}`}
             />
             <Tooltip content={<CustomTooltip formatter={formatCurrency} />} />
@@ -348,7 +376,7 @@ const Charts = ({
               dataKey="net"
               stroke="#8b5cf6"
               strokeWidth={3}
-              dot={{ r: 6, fill: '#8b5cf6' }}
+              dot={{ r: 6, fill: "#8b5cf6" }}
               activeDot={{ r: 8 }}
             />
           </LineChart>
@@ -365,7 +393,7 @@ const Charts = ({
       overview: <DailyOverviewChart fullscreen />,
       categories: <CategoryChart fullscreen />,
       trend: <TrendChart fullscreen />,
-      net: <NetBalanceChart fullscreen />
+      net: <NetBalanceChart fullscreen />,
     };
 
     return (
@@ -391,10 +419,14 @@ const Charts = ({
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div>
-            <h2 className="text-xl font-bold text-gray-900 mb-2">Analytics Dashboard</h2>
-            <p className="text-gray-600">Visual insights into your financial data</p>
+            <h2 className="text-xl font-bold text-gray-900 mb-2">
+              Analytics Dashboard
+            </h2>
+            <p className="text-gray-600">
+              Visual insights into your financial data
+            </p>
           </div>
-          
+
           <div className="flex items-center space-x-3">
             <select
               value={chartFilter}
@@ -402,13 +434,13 @@ const Charts = ({
               className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
             >
               <option value="all">All Categories</option>
-              {CATEGORIES.map(category => (
+              {CATEGORIES.map((category) => (
                 <option key={category.id} value={category.name}>
                   {category.icon} {category.name}
                 </option>
               ))}
             </select>
-            
+
             <button className="flex items-center space-x-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors">
               <Download className="h-4 w-4" />
               <span>Export</span>
@@ -427,22 +459,27 @@ const Charts = ({
 
       {/* Summary Statistics */}
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">Key Insights</h3>
-        
+        <h3 className="text-lg font-semibold text-gray-900 mb-4">
+          Key Insights
+        </h3>
+
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {/* Top Category */}
           <div className="text-center">
             <div className="w-16 h-16 mx-auto mb-3 rounded-full bg-red-100 flex items-center justify-center">
               <TrendingDown className="h-8 w-8 text-red-600" />
             </div>
-            <h4 className="font-semibold text-gray-900 mb-1">Top Expense Category</h4>
+            <h4 className="font-semibold text-gray-900 mb-1">
+              Top Expense Category
+            </h4>
             {chartData.categoryData.length > 0 ? (
               <>
                 <p className="text-2xl font-bold text-red-600">
                   {chartData.categoryData[0].name}
                 </p>
                 <p className="text-sm text-gray-600">
-                  {formatCurrency(chartData.categoryData[0].value)} ({chartData.categoryData[0].percentage}%)
+                  {formatCurrency(chartData.categoryData[0].value)} (
+                  {chartData.categoryData[0].percentage}%)
                 </p>
               </>
             ) : (
@@ -458,8 +495,10 @@ const Charts = ({
             <h4 className="font-semibold text-gray-900 mb-1">7-Day Average</h4>
             <p className="text-2xl font-bold text-blue-600">
               {formatCurrency(
-                chartData.weeklyData.reduce((sum, day) => sum + day.expenses, 0) / 
-                Math.max(chartData.weeklyData.length, 1)
+                chartData.weeklyData.reduce(
+                  (sum, day) => sum + day.expenses,
+                  0,
+                ) / Math.max(chartData.weeklyData.length, 1),
               )}
             </p>
             <p className="text-sm text-gray-600">Daily expenses</p>
@@ -472,10 +511,9 @@ const Charts = ({
             </div>
             <h4 className="font-semibold text-gray-900 mb-1">Savings Rate</h4>
             <p className="text-2xl font-bold text-green-600">
-              {calculations.totalIncome > 0 
+              {calculations.totalIncome > 0
                 ? `${((calculations.balance / calculations.totalIncome) * 100).toFixed(1)}%`
-                : '0%'
-              }
+                : "0%"}
             </p>
             <p className="text-sm text-gray-600">Of daily income</p>
           </div>

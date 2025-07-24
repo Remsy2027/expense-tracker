@@ -1,13 +1,23 @@
-import React from 'react';
-import { Menu, TrendingUp, Home, List, BarChart3, Wallet, Settings, User, Bell } from 'lucide-react';
+import React from "react";
+import {
+  Menu,
+  TrendingUp,
+  Home,
+  List,
+  BarChart3,
+  Wallet,
+  Settings,
+  User,
+  Bell,
+} from "lucide-react";
 
-const Header = ({ 
-  activeTab, 
-  onTabChange, 
-  onMobileMenuToggle, 
+const Header = ({
+  activeTab,
+  onTabChange,
+  onMobileMenuToggle,
   navItems = [],
   notifications = [],
-  user = null 
+  user = null,
 }) => {
   const getIconComponent = (iconName) => {
     const icons = {
@@ -15,7 +25,7 @@ const Header = ({
       List,
       BarChart3,
       Wallet,
-      Settings
+      Settings,
     };
     return icons[iconName] || Home;
   };
@@ -24,11 +34,14 @@ const Header = ({
     <header className="bg-gradient-to-r from-indigo-600 via-purple-600 to-indigo-700 text-white shadow-xl relative overflow-hidden">
       {/* Background Pattern */}
       <div className="absolute inset-0 opacity-10">
-        <div className="absolute inset-0" style={{
-          backgroundImage: `radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.3) 0%, transparent 50%),
+        <div
+          className="absolute inset-0"
+          style={{
+            backgroundImage: `radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.3) 0%, transparent 50%),
                            radial-gradient(circle at 80% 20%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
-                           radial-gradient(circle at 40% 40%, rgba(120, 119, 198, 0.2) 0%, transparent 50%)`
-        }} />
+                           radial-gradient(circle at 40% 40%, rgba(120, 119, 198, 0.2) 0%, transparent 50%)`,
+          }}
+        />
       </div>
 
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -50,8 +63,12 @@ const Header = ({
                 <TrendingUp className="h-6 w-6 text-white" />
               </div>
               <div className="hidden sm:block">
-                <h1 className="text-xl font-bold tracking-tight">ExpenseFlow</h1>
-                <p className="text-xs text-white/80 hidden md:block">Personal Finance Tracker</p>
+                <h1 className="text-xl font-bold tracking-tight">
+                  ExpenseFlow
+                </h1>
+                <p className="text-xs text-white/80 hidden md:block">
+                  Personal Finance Tracker
+                </p>
               </div>
             </div>
           </div>
@@ -66,8 +83,8 @@ const Header = ({
                   onClick={() => onTabChange(item.id)}
                   className={`flex items-center space-x-2 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
                     activeTab === item.id
-                      ? 'bg-white/20 text-white shadow-lg backdrop-blur-sm border border-white/20'
-                      : 'text-white/80 hover:text-white hover:bg-white/10'
+                      ? "bg-white/20 text-white shadow-lg backdrop-blur-sm border border-white/20"
+                      : "text-white/80 hover:text-white hover:bg-white/10"
                   }`}
                   aria-label={`Navigate to ${item.label}`}
                 >
@@ -89,7 +106,7 @@ const Header = ({
                 <Bell className="h-5 w-5" />
                 {notifications.length > 0 && (
                   <span className="absolute -top-1 -right-1 h-4 w-4 bg-red-500 rounded-full flex items-center justify-center text-xs font-medium">
-                    {notifications.length > 9 ? '9+' : notifications.length}
+                    {notifications.length > 9 ? "9+" : notifications.length}
                   </span>
                 )}
               </button>
@@ -113,7 +130,7 @@ const Header = ({
                   </div>
                 )}
                 <span className="hidden md:block text-sm font-medium">
-                  {user?.name || 'User'}
+                  {user?.name || "User"}
                 </span>
               </button>
             </div>
@@ -139,8 +156,8 @@ const Header = ({
                   onClick={() => onTabChange(item.id)}
                   className={`flex flex-col items-center space-y-1 px-3 py-2 rounded-lg text-xs font-medium transition-all duration-200 min-w-0 flex-shrink-0 ${
                     activeTab === item.id
-                      ? 'bg-white/20 text-white'
-                      : 'text-white/70 hover:text-white hover:bg-white/10'
+                      ? "bg-white/20 text-white"
+                      : "text-white/70 hover:text-white hover:bg-white/10"
                   }`}
                   aria-label={`Navigate to ${item.label}`}
                 >
@@ -163,8 +180,8 @@ const Header = ({
                   key={item.id}
                   className={`h-1 transition-all duration-300 ${
                     activeTab === item.id
-                      ? 'w-12 bg-white shadow-lg'
-                      : 'w-6 bg-white/20'
+                      ? "w-12 bg-white shadow-lg"
+                      : "w-6 bg-white/20"
                   }`}
                 />
               ))}

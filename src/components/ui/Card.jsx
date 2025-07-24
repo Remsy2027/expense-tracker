@@ -1,45 +1,47 @@
-import React from 'react';
+import React from "react";
 
 const Card = ({
   children,
-  className = '',
-  padding = 'md',
-  shadow = 'sm',
-  rounded = 'lg',
+  className = "",
+  padding = "md",
+  shadow = "sm",
+  rounded = "lg",
   border = true,
   hover = false,
   ...props
 }) => {
   const paddingClasses = {
-    none: '',
-    sm: 'p-4',
-    md: 'p-6',
-    lg: 'p-8',
-    xl: 'p-10'
+    none: "",
+    sm: "p-4",
+    md: "p-6",
+    lg: "p-8",
+    xl: "p-10",
   };
 
   const shadowClasses = {
-    none: '',
-    sm: 'shadow-sm',
-    md: 'shadow-md',
-    lg: 'shadow-lg',
-    xl: 'shadow-xl'
+    none: "",
+    sm: "shadow-sm",
+    md: "shadow-md",
+    lg: "shadow-lg",
+    xl: "shadow-xl",
   };
 
   const roundedClasses = {
-    none: '',
-    sm: 'rounded-sm',
-    md: 'rounded-md',
-    lg: 'rounded-lg',
-    xl: 'rounded-xl',
-    '2xl': 'rounded-2xl',
-    full: 'rounded-full'
+    none: "",
+    sm: "rounded-sm",
+    md: "rounded-md",
+    lg: "rounded-lg",
+    xl: "rounded-xl",
+    "2xl": "rounded-2xl",
+    full: "rounded-full",
   };
 
-  const baseClasses = 'bg-white';
-  const borderClass = border ? 'border border-gray-200' : '';
-  const hoverClass = hover ? 'hover:shadow-lg hover:-translate-y-1 transition-all duration-200' : '';
-  
+  const baseClasses = "bg-white";
+  const borderClass = border ? "border border-gray-200" : "";
+  const hoverClass = hover
+    ? "hover:shadow-lg hover:-translate-y-1 transition-all duration-200"
+    : "";
+
   const classes = `
     ${baseClasses}
     ${paddingClasses[padding]}
@@ -48,7 +50,9 @@ const Card = ({
     ${borderClass}
     ${hoverClass}
     ${className}
-  `.trim().replace(/\s+/g, ' ');
+  `
+    .trim()
+    .replace(/\s+/g, " ");
 
   return (
     <div className={classes} {...props}>
@@ -57,14 +61,14 @@ const Card = ({
   );
 };
 
-export const CardHeader = ({ 
-  children, 
-  className = '',
+export const CardHeader = ({
+  children,
+  className = "",
   divider = true,
-  ...props 
+  ...props
 }) => {
-  const borderClass = divider ? 'border-b border-gray-200 pb-4 mb-6' : '';
-  
+  const borderClass = divider ? "border-b border-gray-200 pb-4 mb-6" : "";
+
   return (
     <div className={`${borderClass} ${className}`} {...props}>
       {children}
@@ -72,48 +76,40 @@ export const CardHeader = ({
   );
 };
 
-export const CardTitle = ({ 
-  children, 
-  className = '',
-  as: Component = 'h3',
-  ...props 
+export const CardTitle = ({
+  children,
+  className = "",
+  as: Component = "h3",
+  ...props
 }) => (
-  <Component 
-    className={`text-lg font-semibold text-gray-900 ${className}`} 
+  <Component
+    className={`text-lg font-semibold text-gray-900 ${className}`}
     {...props}
   >
     {children}
   </Component>
 );
 
-export const CardDescription = ({ 
-  children, 
-  className = '',
-  ...props 
-}) => (
+export const CardDescription = ({ children, className = "", ...props }) => (
   <p className={`text-sm text-gray-600 mt-1 ${className}`} {...props}>
     {children}
   </p>
 );
 
-export const CardContent = ({ 
-  children, 
-  className = '',
-  ...props 
-}) => (
+export const CardContent = ({ children, className = "", ...props }) => (
   <div className={className} {...props}>
     {children}
   </div>
 );
 
-export const CardFooter = ({ 
-  children, 
-  className = '',
+export const CardFooter = ({
+  children,
+  className = "",
   divider = true,
-  ...props 
+  ...props
 }) => {
-  const borderClass = divider ? 'border-t border-gray-200 pt-4 mt-6' : '';
-  
+  const borderClass = divider ? "border-t border-gray-200 pt-4 mt-6" : "";
+
   return (
     <div className={`${borderClass} ${className}`} {...props}>
       {children}
@@ -126,25 +122,25 @@ export const StatsCard = ({
   title,
   value,
   change,
-  changeType = 'neutral',
+  changeType = "neutral",
   icon: Icon,
-  color = 'blue',
-  className = '',
+  color = "blue",
+  className = "",
   ...props
 }) => {
   const colorClasses = {
-    blue: 'from-blue-500 to-blue-600',
-    green: 'from-green-500 to-green-600',
-    red: 'from-red-500 to-red-600',
-    yellow: 'from-yellow-500 to-yellow-600',
-    purple: 'from-purple-500 to-purple-600',
-    indigo: 'from-indigo-500 to-indigo-600'
+    blue: "from-blue-500 to-blue-600",
+    green: "from-green-500 to-green-600",
+    red: "from-red-500 to-red-600",
+    yellow: "from-yellow-500 to-yellow-600",
+    purple: "from-purple-500 to-purple-600",
+    indigo: "from-indigo-500 to-indigo-600",
   };
 
   const changeColors = {
-    positive: 'text-green-600',
-    negative: 'text-red-600',
-    neutral: 'text-gray-600'
+    positive: "text-green-600",
+    negative: "text-red-600",
+    neutral: "text-gray-600",
   };
 
   return (
@@ -179,12 +175,13 @@ export const FeatureCard = ({
   icon: Icon,
   href,
   onClick,
-  className = '',
+  className = "",
   ...props
 }) => {
-  const Component = href ? 'a' : 'div';
+  const Component = href ? "a" : "div";
   const clickProps = href ? { href } : onClick ? { onClick } : {};
-  const interactiveClass = (href || onClick) ? 'cursor-pointer hover:bg-gray-50' : '';
+  const interactiveClass =
+    href || onClick ? "cursor-pointer hover:bg-gray-50" : "";
 
   return (
     <Card className={`${interactiveClass} ${className}`} {...props}>
@@ -195,9 +192,7 @@ export const FeatureCard = ({
           </div>
         )}
         <CardTitle className="mb-2">{title}</CardTitle>
-        {description && (
-          <CardDescription>{description}</CardDescription>
-        )}
+        {description && <CardDescription>{description}</CardDescription>}
       </Component>
     </Card>
   );

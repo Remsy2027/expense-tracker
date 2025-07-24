@@ -1,22 +1,41 @@
-import React, { useState, useRef } from 'react';
-import { Plus, Minus, DollarSign, Receipt, Zap, Clock, Tag, Calculator } from 'lucide-react';
-import { CATEGORIES, INCOME_SOURCES } from '../../utils/constants';
-import { validateTransaction } from '../../utils/helpers';
+import React, { useState, useRef } from "react";
+import {
+  Plus,
+  Minus,
+  DollarSign,
+  Receipt,
+  Zap,
+  Clock,
+  Tag,
+  Calculator,
+} from "lucide-react";
+import { CATEGORIES, INCOME_SOURCES } from "../../utils/constants";
+import { validateTransaction } from "../../utils/helpers";
 
-const QuickActions = ({ 
-  onAddIncome, 
+const QuickActions = ({
+  onAddIncome,
   onAddExpense,
   recentTransactions = [],
   quickAmounts = [50, 100, 200, 500, 1000],
   showQuickAmounts = true,
-  showRecentTransactions = true
+  showRecentTransactions = true,
 }) => {
   // Form states
-  const [incomeForm, setIncomeForm] = useState({ source: '', amount: '' });
-  const [expenseForm, setExpenseForm] = useState({ description: '', category: 'Food', amount: '' });
-  const [isSubmitting, setIsSubmitting] = useState({ income: false, expense: false });
+  const [incomeForm, setIncomeForm] = useState({ source: "", amount: "" });
+  const [expenseForm, setExpenseForm] = useState({
+    description: "",
+    category: "Food",
+    amount: "",
+  });
+  const [isSubmitting, setIsSubmitting] = useState({
+    income: false,
+    expense: false,
+  });
   const [errors, setErrors] = useState({ income: {}, expense: {} });
-  const [showQuickEntry, setShowQuickEntry] = useState({ income: false, expense: false });
+  const [showQuickEntry, setShowQuickEntry] = useState({
+    income: false,
+    expense: false,
+  });
 
   // Refs for form inputs
   const incomeAmountRef = useRef(null);
@@ -25,96 +44,108 @@ const QuickActions = ({
   // Handle income form submission
   const handleIncomeSubmit = async (e) => {
     e.preventDefault();
-    
+
     // Validate form
-    const validation = validateTransaction(incomeForm, 'income');
+    const validation = validateTransaction(incomeForm, "income");
     if (!validation.isValid) {
-      setErrors(prev => ({ ...prev, income: { general: validation.errors.join(', ') } }));
+      setErrors((prev) => ({
+        ...prev,
+        income: { general: validation.errors.join(", ") },
+      }));
       return;
     }
 
-    setIsSubmitting(prev => ({ ...prev, income: true }));
-    setErrors(prev => ({ ...prev, income: {} }));
+    setIsSubmitting((prev) => ({ ...prev, income: true }));
+    setErrors((prev) => ({ ...prev, income: {} }));
 
     try {
       const result = await onAddIncome(incomeForm);
       if (result && result.success) {
-        setIncomeForm({ source: '', amount: '' });
-        setShowQuickEntry(prev => ({ ...prev, income: false }));
+        setIncomeForm({ source: "", amount: "" });
+        setShowQuickEntry((prev) => ({ ...prev, income: false }));
       }
     } catch (error) {
-      setErrors(prev => ({ ...prev, income: { general: 'Failed to add income' } }));
+      setErrors((prev) => ({
+        ...prev,
+        income: { general: "Failed to add income" },
+      }));
     } finally {
-      setIsSubmitting(prev => ({ ...prev, income: false }));
+      setIsSubmitting((prev) => ({ ...prev, income: false }));
     }
   };
 
   // Handle expense form submission
   const handleExpenseSubmit = async (e) => {
     e.preventDefault();
-    
+
     // Validate form
-    const validation = validateTransaction(expenseForm, 'expense');
+    const validation = validateTransaction(expenseForm, "expense");
     if (!validation.isValid) {
-      setErrors(prev => ({ ...prev, expense: { general: validation.errors.join(', ') } }));
+      setErrors((prev) => ({
+        ...prev,
+        expense: { general: validation.errors.join(", ") },
+      }));
       return;
     }
 
-    setIsSubmitting(prev => ({ ...prev, expense: true }));
-    setErrors(prev => ({ ...prev, expense: {} }));
+    setIsSubmitting((prev) => ({ ...prev, expense: true }));
+    setErrors((prev) => ({ ...prev, expense: {} }));
 
     try {
       const result = await onAddExpense(expenseForm);
       if (result && result.success) {
-        setExpenseForm({ description: '', category: 'Food', amount: '' });
-        setShowQuickEntry(prev => ({ ...prev, expense: false }));
+        setExpenseForm({ description: "", category: "Food", amount: "" });
+        setShowQuickEntry((prev) => ({ ...prev, expense: false }));
       }
     } catch (error) {
-      setErrors(prev => ({ ...prev, expense: { general: 'Failed to add expense' } }));
+      setErrors((prev) => ({
+        ...prev,
+        expense: { general: "Failed to add expense" },
+      }));
     } finally {
-      setIsSubmitting(prev => ({ ...prev, expense: false }));
+      setIsSubmitting((prev) => ({ ...prev, expense: false }));
     }
   };
 
   // Quick amount handlers
   const handleQuickIncome = async (amount) => {
-    setIsSubmitting(prev => ({ ...prev, income: true }));
+    setIsSubmitting((prev) => ({ ...prev, income: true }));
     try {
-      await onAddIncome({ source: 'Quick Income', amount });
+      await onAddIncome({ source: "Quick Income", amount });
     } finally {
-      setIsSubmitting(prev => ({ ...prev, income: false }));
+      setIsSubmitting((prev) => ({ ...prev, income: false }));
     }
   };
 
-  const handleQuickExpense = async (amount, category = 'Other') => {
-    setIsSubmitting(prev => ({ ...prev, expense: true }));
+  const handleQuickExpense = async (amount, category = "Other") => {
+    setIsSubmitting((prev) => ({ ...prev, expense: true }));
     try {
-      await onAddExpense({ description: 'Quick Expense', category, amount });
+      await onAddExpense({ description: "Quick Expense", category, amount });
     } finally {
-      setIsSubmitting(prev => ({ ...prev, expense: false }));
+      setIsSubmitting((prev) => ({ ...prev, expense: false }));
     }
   };
 
   // Handle recent transaction repeat
   const handleRepeatTransaction = async (transaction) => {
-    if (transaction.type === 'income') {
+    if (transaction.type === "income") {
       await onAddIncome({
         source: `${transaction.source} (repeat)`,
-        amount: transaction.amount
+        amount: transaction.amount,
       });
     } else {
       await onAddExpense({
         description: `${transaction.description} (repeat)`,
         category: transaction.category,
-        amount: transaction.amount
+        amount: transaction.amount,
       });
     }
   };
 
   // Keyboard shortcuts
   const handleKeyPress = (e, type) => {
-    if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
-      if (type === 'income') {
+    if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) {
+      if (type === "income") {
         handleIncomeSubmit(e);
       } else {
         handleExpenseSubmit(e);
@@ -151,7 +182,7 @@ const QuickActions = ({
                       Quick Add
                     </h4>
                     <div className="grid grid-cols-3 gap-2">
-                      {quickAmounts.map(amount => (
+                      {quickAmounts.map((amount) => (
                         <button
                           key={amount}
                           onClick={() => handleQuickIncome(amount)}
@@ -167,7 +198,9 @@ const QuickActions = ({
 
                 <div className="border-t border-gray-200 pt-4">
                   <button
-                    onClick={() => setShowQuickEntry(prev => ({ ...prev, income: true }))}
+                    onClick={() =>
+                      setShowQuickEntry((prev) => ({ ...prev, income: true }))
+                    }
                     className="w-full flex items-center justify-center space-x-2 p-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
                   >
                     <Receipt className="h-4 w-4" />
@@ -183,11 +216,16 @@ const QuickActions = ({
                   </label>
                   <select
                     value={incomeForm.source}
-                    onChange={(e) => setIncomeForm(prev => ({ ...prev, source: e.target.value }))}
+                    onChange={(e) =>
+                      setIncomeForm((prev) => ({
+                        ...prev,
+                        source: e.target.value,
+                      }))
+                    }
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
                   >
                     <option value="">Select source</option>
-                    {INCOME_SOURCES.map(source => (
+                    {INCOME_SOURCES.map((source) => (
                       <option key={source.id} value={source.name}>
                         {source.icon} {source.name}
                       </option>
@@ -205,8 +243,13 @@ const QuickActions = ({
                       ref={incomeAmountRef}
                       type="number"
                       value={incomeForm.amount}
-                      onChange={(e) => setIncomeForm(prev => ({ ...prev, amount: e.target.value }))}
-                      onKeyPress={(e) => handleKeyPress(e, 'income')}
+                      onChange={(e) =>
+                        setIncomeForm((prev) => ({
+                          ...prev,
+                          amount: e.target.value,
+                        }))
+                      }
+                      onKeyPress={(e) => handleKeyPress(e, "income")}
                       className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
                       placeholder="0"
                       min="0"
@@ -216,7 +259,9 @@ const QuickActions = ({
                 </div>
 
                 {errors.income.general && (
-                  <p className="text-sm text-red-600">{errors.income.general}</p>
+                  <p className="text-sm text-red-600">
+                    {errors.income.general}
+                  </p>
                 )}
 
                 <div className="flex space-x-3">
@@ -236,7 +281,9 @@ const QuickActions = ({
                   </button>
                   <button
                     type="button"
-                    onClick={() => setShowQuickEntry(prev => ({ ...prev, income: false }))}
+                    onClick={() =>
+                      setShowQuickEntry((prev) => ({ ...prev, income: false }))
+                    }
                     className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
                   >
                     Cancel
@@ -255,7 +302,9 @@ const QuickActions = ({
                 <Minus className="h-5 w-5 text-white" />
               </div>
               <div>
-                <h3 className="text-lg font-semibold text-white">Add Expense</h3>
+                <h3 className="text-lg font-semibold text-white">
+                  Add Expense
+                </h3>
                 <p className="text-red-100 text-sm">Track your spending</p>
               </div>
             </div>
@@ -271,12 +320,18 @@ const QuickActions = ({
                     Quick Categories
                   </h4>
                   <div className="grid grid-cols-2 gap-2">
-                    {CATEGORIES.slice(0, 4).map(category => (
+                    {CATEGORIES.slice(0, 4).map((category) => (
                       <button
                         key={category.id}
                         onClick={() => {
-                          setExpenseForm(prev => ({ ...prev, category: category.name }));
-                          setShowQuickEntry(prev => ({ ...prev, expense: true }));
+                          setExpenseForm((prev) => ({
+                            ...prev,
+                            category: category.name,
+                          }));
+                          setShowQuickEntry((prev) => ({
+                            ...prev,
+                            expense: true,
+                          }));
                         }}
                         className="p-3 text-sm font-medium bg-red-50 text-red-700 rounded-lg hover:bg-red-100 transition-colors flex items-center space-x-2"
                       >
@@ -289,7 +344,9 @@ const QuickActions = ({
 
                 <div className="border-t border-gray-200 pt-4">
                   <button
-                    onClick={() => setShowQuickEntry(prev => ({ ...prev, expense: true }))}
+                    onClick={() =>
+                      setShowQuickEntry((prev) => ({ ...prev, expense: true }))
+                    }
                     className="w-full flex items-center justify-center space-x-2 p-3 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
                   >
                     <Receipt className="h-4 w-4" />
@@ -306,7 +363,12 @@ const QuickActions = ({
                   <input
                     type="text"
                     value={expenseForm.description}
-                    onChange={(e) => setExpenseForm(prev => ({ ...prev, description: e.target.value }))}
+                    onChange={(e) =>
+                      setExpenseForm((prev) => ({
+                        ...prev,
+                        description: e.target.value,
+                      }))
+                    }
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
                     placeholder="e.g., Lunch, Grocery, Gas"
                   />
@@ -318,10 +380,15 @@ const QuickActions = ({
                   </label>
                   <select
                     value={expenseForm.category}
-                    onChange={(e) => setExpenseForm(prev => ({ ...prev, category: e.target.value }))}
+                    onChange={(e) =>
+                      setExpenseForm((prev) => ({
+                        ...prev,
+                        category: e.target.value,
+                      }))
+                    }
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
                   >
-                    {CATEGORIES.map(category => (
+                    {CATEGORIES.map((category) => (
                       <option key={category.id} value={category.name}>
                         {category.icon} {category.name}
                       </option>
@@ -339,8 +406,13 @@ const QuickActions = ({
                       ref={expenseAmountRef}
                       type="number"
                       value={expenseForm.amount}
-                      onChange={(e) => setExpenseForm(prev => ({ ...prev, amount: e.target.value }))}
-                      onKeyPress={(e) => handleKeyPress(e, 'expense')}
+                      onChange={(e) =>
+                        setExpenseForm((prev) => ({
+                          ...prev,
+                          amount: e.target.value,
+                        }))
+                      }
+                      onKeyPress={(e) => handleKeyPress(e, "expense")}
                       className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
                       placeholder="0"
                       min="0"
@@ -350,7 +422,9 @@ const QuickActions = ({
                 </div>
 
                 {errors.expense.general && (
-                  <p className="text-sm text-red-600">{errors.expense.general}</p>
+                  <p className="text-sm text-red-600">
+                    {errors.expense.general}
+                  </p>
                 )}
 
                 <div className="flex space-x-3">
@@ -370,7 +444,9 @@ const QuickActions = ({
                   </button>
                   <button
                     type="button"
-                    onClick={() => setShowQuickEntry(prev => ({ ...prev, expense: false }))}
+                    onClick={() =>
+                      setShowQuickEntry((prev) => ({ ...prev, expense: false }))
+                    }
                     className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
                   >
                     Cancel
@@ -387,7 +463,9 @@ const QuickActions = ({
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
           <div className="flex items-center space-x-2 mb-4">
             <Clock className="h-5 w-5 text-gray-500" />
-            <h3 className="text-lg font-semibold text-gray-900">Recent Transactions</h3>
+            <h3 className="text-lg font-semibold text-gray-900">
+              Recent Transactions
+            </h3>
             <span className="text-sm text-gray-500">- Click to repeat</span>
           </div>
 
@@ -398,23 +476,33 @@ const QuickActions = ({
                 onClick={() => handleRepeatTransaction(transaction)}
                 className="flex items-center space-x-3 p-3 border border-gray-200 rounded-lg hover:bg-gray-50 hover:border-gray-300 transition-all text-left"
               >
-                <div className={`p-2 rounded-lg ${
-                  transaction.type === 'income' ? 'bg-green-100' : 'bg-red-100'
-                }`}>
-                  {transaction.type === 'income' ? (
-                    <Plus className={`h-4 w-4 ${
-                      transaction.type === 'income' ? 'text-green-600' : 'text-red-600'
-                    }`} />
+                <div
+                  className={`p-2 rounded-lg ${
+                    transaction.type === "income"
+                      ? "bg-green-100"
+                      : "bg-red-100"
+                  }`}
+                >
+                  {transaction.type === "income" ? (
+                    <Plus
+                      className={`h-4 w-4 ${
+                        transaction.type === "income"
+                          ? "text-green-600"
+                          : "text-red-600"
+                      }`}
+                    />
                   ) : (
                     <Minus className="h-4 w-4 text-red-600" />
                   )}
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-medium text-gray-900 truncate">
-                    {transaction.type === 'income' ? transaction.source : transaction.description}
+                    {transaction.type === "income"
+                      ? transaction.source
+                      : transaction.description}
                   </p>
                   <p className="text-xs text-gray-500">
-                    ₹{transaction.amount} • {transaction.category || 'Income'}
+                    ₹{transaction.amount} • {transaction.category || "Income"}
                   </p>
                 </div>
               </button>
@@ -427,12 +515,16 @@ const QuickActions = ({
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
         <div className="flex items-center space-x-2 mb-4">
           <Calculator className="h-5 w-5 text-gray-500" />
-          <h3 className="text-lg font-semibold text-gray-900">Quick Calculator</h3>
+          <h3 className="text-lg font-semibold text-gray-900">
+            Quick Calculator
+          </h3>
         </div>
-        
+
         <div className="text-center text-gray-500">
           <p className="text-sm">Calculator widget coming soon!</p>
-          <p className="text-xs mt-1">Quickly calculate amounts before adding transactions</p>
+          <p className="text-xs mt-1">
+            Quickly calculate amounts before adding transactions
+          </p>
         </div>
       </div>
     </div>

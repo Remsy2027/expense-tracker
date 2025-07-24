@@ -179,7 +179,8 @@
   20% {
     transform: scale(0.9);
   }
-  50%, 55% {
+  50%,
+  55% {
     opacity: 1;
     transform: scale(1.1);
   }
@@ -190,19 +191,28 @@
 }
 
 @keyframes shake {
-  0%, 100% {
+  0%,
+  100% {
     transform: translateX(0);
   }
-  10%, 30%, 50%, 70%, 90% {
+  10%,
+  30%,
+  50%,
+  70%,
+  90% {
     transform: translateX(-10px);
   }
-  20%, 40%, 60%, 80% {
+  20%,
+  40%,
+  60%,
+  80% {
     transform: translateX(10px);
   }
 }
 
 @keyframes pulse {
-  0%, 100% {
+  0%,
+  100% {
     opacity: 1;
   }
   50% {
@@ -229,7 +239,8 @@
 }
 
 @keyframes wiggle {
-  0%, 7% {
+  0%,
+  7% {
     transform: rotateZ(0);
   }
   15% {
@@ -247,13 +258,15 @@
   35% {
     transform: rotateZ(-4deg);
   }
-  40%, 100% {
+  40%,
+  100% {
     transform: rotateZ(0);
   }
 }
 
 @keyframes float {
-  0%, 100% {
+  0%,
+  100% {
     transform: translateY(0px);
   }
   50% {
@@ -262,7 +275,8 @@
 }
 
 @keyframes glow {
-  0%, 100% {
+  0%,
+  100% {
     box-shadow: 0 0 5px rgba(99, 102, 241, 0.5);
   }
   50% {
@@ -289,7 +303,8 @@
 }
 
 @keyframes blink {
-  from, to {
+  from,
+  to {
     border-color: transparent;
   }
   50% {
@@ -404,7 +419,9 @@
   overflow: hidden;
   border-right: 0.15em solid currentColor;
   white-space: nowrap;
-  animation: typewriter 3.5s steps(40, end), blink 0.75s step-end infinite;
+  animation:
+    typewriter 3.5s steps(40, end),
+    blink 0.75s step-end infinite;
 }
 
 /* Staggered animations */
@@ -413,12 +430,24 @@
   animation: fadeInUp 0.6s ease-out forwards;
 }
 
-.animate-stagger-fade-in > *:nth-child(1) { animation-delay: 0.1s; }
-.animate-stagger-fade-in > *:nth-child(2) { animation-delay: 0.2s; }
-.animate-stagger-fade-in > *:nth-child(3) { animation-delay: 0.3s; }
-.animate-stagger-fade-in > *:nth-child(4) { animation-delay: 0.4s; }
-.animate-stagger-fade-in > *:nth-child(5) { animation-delay: 0.5s; }
-.animate-stagger-fade-in > *:nth-child(6) { animation-delay: 0.6s; }
+.animate-stagger-fade-in > *:nth-child(1) {
+  animation-delay: 0.1s;
+}
+.animate-stagger-fade-in > *:nth-child(2) {
+  animation-delay: 0.2s;
+}
+.animate-stagger-fade-in > *:nth-child(3) {
+  animation-delay: 0.3s;
+}
+.animate-stagger-fade-in > *:nth-child(4) {
+  animation-delay: 0.4s;
+}
+.animate-stagger-fade-in > *:nth-child(5) {
+  animation-delay: 0.5s;
+}
+.animate-stagger-fade-in > *:nth-child(6) {
+  animation-delay: 0.6s;
+}
 
 /* Hover animations */
 .hover-lift {
@@ -475,22 +504,24 @@
 }
 
 .loading-dots::after {
-  content: '';
+  content: "";
   animation: loadingDots 1.5s infinite;
 }
 
 @keyframes loadingDots {
-  0%, 20% {
-    content: '';
+  0%,
+  20% {
+    content: "";
   }
   40% {
-    content: '.';
+    content: ".";
   }
   60% {
-    content: '..';
+    content: "..";
   }
-  80%, 100% {
-    content: '...';
+  80%,
+  100% {
+    content: "...";
   }
 }
 
@@ -539,7 +570,8 @@
     top: 8px;
     height: 64px;
   }
-  50%, 100% {
+  50%,
+  100% {
     top: 24px;
     height: 32px;
   }
@@ -606,7 +638,7 @@
     transform: none !important;
     transition: none !important;
   }
-  
+
   .loading-spinner,
   .loading-bars div {
     animation: none !important;

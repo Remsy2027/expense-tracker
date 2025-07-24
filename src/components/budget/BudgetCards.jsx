@@ -1,112 +1,114 @@
-import React from 'react';
-import { 
-  TrendingUp, 
-  TrendingDown, 
-  Target, 
+import React from "react";
+import {
+  TrendingUp,
+  TrendingDown,
+  Target,
   DollarSign,
   Calendar,
   AlertCircle,
   CheckCircle,
-  Clock
-} from 'lucide-react';
-import { formatCurrency } from '../../utils/helpers';
+  Clock,
+} from "lucide-react";
+import { formatCurrency } from "../../utils/helpers";
 
-const BudgetCards = ({ 
-  calculations, 
-  budgetGoals, 
-  budgetPerformance, 
+const BudgetCards = ({
+  calculations,
+  budgetGoals,
+  budgetPerformance,
   monthProgress,
-  className = ""
+  className = "",
 }) => {
   const cards = [
     {
-      id: 'income',
-      title: 'Monthly Income',
+      id: "income",
+      title: "Monthly Income",
       current: calculations.monthlyIncome,
       target: budgetGoals.monthlyIncome,
       progress: budgetPerformance.incomeProgress,
       projected: budgetPerformance.projectedIncome,
       icon: TrendingUp,
-      color: 'green',
-      type: 'income'
+      color: "green",
+      type: "income",
     },
     {
-      id: 'expenses',
-      title: 'Monthly Expenses',
+      id: "expenses",
+      title: "Monthly Expenses",
       current: calculations.monthlyExpenses,
       target: budgetGoals.monthlyExpenses,
       progress: budgetPerformance.expenseProgress,
       projected: budgetPerformance.projectedExpenses,
       icon: TrendingDown,
-      color: 'red',
-      type: 'expense'
+      color: "red",
+      type: "expense",
     },
     {
-      id: 'savings',
-      title: 'Monthly Savings',
+      id: "savings",
+      title: "Monthly Savings",
       current: calculations.monthlySavings,
       target: budgetGoals.savingsTarget,
       progress: budgetPerformance.savingsProgress,
       projected: calculations.monthlySavings, // Savings don't project the same way
       icon: Target,
-      color: 'blue',
-      type: 'savings'
+      color: "blue",
+      type: "savings",
     },
     {
-      id: 'balance',
-      title: 'Current Balance',
+      id: "balance",
+      title: "Current Balance",
       current: calculations.balance,
       target: null, // No target for daily balance
       progress: null,
       projected: null,
       icon: DollarSign,
-      color: calculations.balance >= 0 ? 'blue' : 'orange',
-      type: 'balance'
-    }
+      color: calculations.balance >= 0 ? "blue" : "orange",
+      type: "balance",
+    },
   ];
 
   const getStatusInfo = (card) => {
-    if (card.type === 'balance') {
+    if (card.type === "balance") {
       return {
-        status: card.current >= 0 ? 'good' : 'poor',
-        message: card.current >= 0 ? 'Positive balance' : 'Negative balance',
-        icon: card.current >= 0 ? CheckCircle : AlertCircle
+        status: card.current >= 0 ? "good" : "poor",
+        message: card.current >= 0 ? "Positive balance" : "Negative balance",
+        icon: card.current >= 0 ? CheckCircle : AlertCircle,
       };
     }
 
-    if (!card.target) return { status: 'neutral', message: 'No target set', icon: Clock };
+    if (!card.target)
+      return { status: "neutral", message: "No target set", icon: Clock };
 
     const timeProgress = monthProgress;
-    const expectedProgress = card.type === 'expense' ? timeProgress : timeProgress;
-    
+    const expectedProgress =
+      card.type === "expense" ? timeProgress : timeProgress;
+
     let status, message, icon;
-    
-    if (card.type === 'expense') {
+
+    if (card.type === "expense") {
       if (card.progress <= expectedProgress) {
-        status = 'good';
-        message = 'On track';
+        status = "good";
+        message = "On track";
         icon = CheckCircle;
       } else if (card.progress <= 100) {
-        status = 'warning';
-        message = 'Monitor closely';
+        status = "warning";
+        message = "Monitor closely";
         icon = AlertCircle;
       } else {
-        status = 'danger';
-        message = 'Over budget';
+        status = "danger";
+        message = "Over budget";
         icon = AlertCircle;
       }
     } else {
       if (card.progress >= expectedProgress * 0.8) {
-        status = 'good';
-        message = 'On track';
+        status = "good";
+        message = "On track";
         icon = CheckCircle;
       } else if (card.progress >= expectedProgress * 0.5) {
-        status = 'warning';
-        message = 'Behind target';
+        status = "warning";
+        message = "Behind target";
         icon = AlertCircle;
       } else {
-        status = 'danger';
-        message = 'Significantly behind';
+        status = "danger";
+        message = "Significantly behind";
         icon = AlertCircle;
       }
     }
@@ -116,44 +118,54 @@ const BudgetCards = ({
 
   const getCardBackground = (card) => {
     const statusInfo = getStatusInfo(card);
-    
+
     switch (statusInfo.status) {
-      case 'good':
-        return 'from-green-500 to-green-600';
-      case 'warning':
-        return 'from-yellow-500 to-yellow-600';
-      case 'danger':
-        return 'from-red-500 to-red-600';
-      case 'poor':
-        return 'from-orange-500 to-orange-600';
+      case "good":
+        return "from-green-500 to-green-600";
+      case "warning":
+        return "from-yellow-500 to-yellow-600";
+      case "danger":
+        return "from-red-500 to-red-600";
+      case "poor":
+        return "from-orange-500 to-orange-600";
       default:
-        return card.color === 'green' ? 'from-green-500 to-green-600' :
-               card.color === 'red' ? 'from-red-500 to-red-600' :
-               card.color === 'blue' ? 'from-blue-500 to-blue-600' :
-               'from-gray-500 to-gray-600';
+        return card.color === "green"
+          ? "from-green-500 to-green-600"
+          : card.color === "red"
+            ? "from-red-500 to-red-600"
+            : card.color === "blue"
+              ? "from-blue-500 to-blue-600"
+              : "from-gray-500 to-gray-600";
     }
   };
 
   return (
-    <div className={`grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 ${className}`}>
+    <div
+      className={`grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 ${className}`}
+    >
       {cards.map((card) => {
         const IconComponent = card.icon;
         const statusInfo = getStatusInfo(card);
         const StatusIcon = statusInfo.icon;
-        
+
         return (
           <div
             key={card.id}
             className="relative overflow-hidden rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 hover:-translate-y-1"
           >
             {/* Gradient Background */}
-            <div className={`bg-gradient-to-br ${getCardBackground(card)} p-6 text-white relative`}>
+            <div
+              className={`bg-gradient-to-br ${getCardBackground(card)} p-6 text-white relative`}
+            >
               {/* Background Pattern */}
               <div className="absolute inset-0 opacity-10">
-                <div className="absolute inset-0" style={{
-                  backgroundImage: `radial-gradient(circle at 20% 80%, rgba(255, 255, 255, 0.3) 0%, transparent 50%),
-                                   radial-gradient(circle at 80% 20%, rgba(255, 255, 255, 0.2) 0%, transparent 50%)`
-                }} />
+                <div
+                  className="absolute inset-0"
+                  style={{
+                    backgroundImage: `radial-gradient(circle at 20% 80%, rgba(255, 255, 255, 0.3) 0%, transparent 50%),
+                                   radial-gradient(circle at 80% 20%, rgba(255, 255, 255, 0.2) 0%, transparent 50%)`,
+                  }}
+                />
               </div>
 
               {/* Header */}
@@ -222,35 +234,49 @@ const BudgetCards = ({
                   <div>
                     <p className="text-xs text-gray-600">Remaining</p>
                     <p className="font-semibold text-gray-900">
-                      {card.type === 'expense' 
-                        ? formatCurrency(Math.max(0, card.target - card.current))
-                        : formatCurrency(Math.max(0, card.target - card.current))
-                      }
+                      {card.type === "expense"
+                        ? formatCurrency(
+                            Math.max(0, card.target - card.current),
+                          )
+                        : formatCurrency(
+                            Math.max(0, card.target - card.current),
+                          )}
                     </p>
                   </div>
                   <div>
                     <p className="text-xs text-gray-600">
-                      {card.type === 'expense' ? 'Budget Left' : 'To Goal'}
+                      {card.type === "expense" ? "Budget Left" : "To Goal"}
                     </p>
-                    <p className={`font-semibold ${
-                      card.type === 'expense'
-                        ? card.current <= card.target ? 'text-green-600' : 'text-red-600'
-                        : card.current >= card.target ? 'text-green-600' : 'text-blue-600'
-                    }`}>
-                      {card.type === 'expense'
-                        ? card.current <= card.target ? 'Within Budget' : 'Over Budget'
-                        : card.current >= card.target ? 'Goal Met' : 'In Progress'
-                      }
+                    <p
+                      className={`font-semibold ${
+                        card.type === "expense"
+                          ? card.current <= card.target
+                            ? "text-green-600"
+                            : "text-red-600"
+                          : card.current >= card.target
+                            ? "text-green-600"
+                            : "text-blue-600"
+                      }`}
+                    >
+                      {card.type === "expense"
+                        ? card.current <= card.target
+                          ? "Within Budget"
+                          : "Over Budget"
+                        : card.current >= card.target
+                          ? "Goal Met"
+                          : "In Progress"}
                     </p>
                   </div>
                 </div>
               ) : (
                 <div className="text-center">
                   <p className="text-xs text-gray-600">Today's Status</p>
-                  <p className={`font-semibold ${
-                    card.current >= 0 ? 'text-green-600' : 'text-orange-600'
-                  }`}>
-                    {card.current >= 0 ? 'Surplus' : 'Deficit'}
+                  <p
+                    className={`font-semibold ${
+                      card.current >= 0 ? "text-green-600" : "text-orange-600"
+                    }`}
+                  >
+                    {card.current >= 0 ? "Surplus" : "Deficit"}
                   </p>
                 </div>
               )}

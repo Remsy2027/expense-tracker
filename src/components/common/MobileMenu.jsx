@@ -1,40 +1,53 @@
-import React, { useEffect } from 'react';
-import { X, Home, List, BarChart3, Wallet, Settings, HelpCircle, Download, Upload, Moon, Sun, User } from 'lucide-react';
+import React, { useEffect } from "react";
+import {
+  X,
+  Home,
+  List,
+  BarChart3,
+  Wallet,
+  Settings,
+  HelpCircle,
+  Download,
+  Upload,
+  Moon,
+  Sun,
+  User,
+} from "lucide-react";
 
-const MobileMenu = ({ 
-  isOpen, 
-  onClose, 
-  navItems = [], 
-  activeTab, 
+const MobileMenu = ({
+  isOpen,
+  onClose,
+  navItems = [],
+  activeTab,
   onTabChange,
   user = null,
-  theme = 'light',
+  theme = "light",
   onThemeToggle,
   onExportData,
-  onImportData
+  onImportData,
 }) => {
   // Close menu on escape key
   useEffect(() => {
     const handleEscape = (e) => {
-      if (e.key === 'Escape' && isOpen) {
+      if (e.key === "Escape" && isOpen) {
         onClose();
       }
     };
 
-    document.addEventListener('keydown', handleEscape);
-    return () => document.removeEventListener('keydown', handleEscape);
+    document.addEventListener("keydown", handleEscape);
+    return () => document.removeEventListener("keydown", handleEscape);
   }, [isOpen, onClose]);
 
   // Prevent body scroll when menu is open
   useEffect(() => {
     if (isOpen) {
-      document.body.style.overflow = 'hidden';
+      document.body.style.overflow = "hidden";
     } else {
-      document.body.style.overflow = '';
+      document.body.style.overflow = "";
     }
 
     return () => {
-      document.body.style.overflow = '';
+      document.body.style.overflow = "";
     };
   }, [isOpen]);
 
@@ -44,7 +57,7 @@ const MobileMenu = ({
       List,
       BarChart3,
       Wallet,
-      Settings
+      Settings,
     };
     return icons[iconName] || Home;
   };
@@ -55,57 +68,57 @@ const MobileMenu = ({
   };
 
   const menuItems = [
-    ...navItems.map(item => ({
+    ...navItems.map((item) => ({
       ...item,
-      type: 'navigation'
+      type: "navigation",
     })),
-    { 
-      id: 'divider-1', 
-      type: 'divider' 
+    {
+      id: "divider-1",
+      type: "divider",
     },
     {
-      id: 'export',
-      label: 'Export Data',
-      icon: 'Download',
-      type: 'action',
+      id: "export",
+      label: "Export Data",
+      icon: "Download",
+      type: "action",
       action: () => {
         onExportData?.();
         onClose();
-      }
+      },
     },
     {
-      id: 'import',
-      label: 'Import Data',
-      icon: 'Upload',
-      type: 'action',
+      id: "import",
+      label: "Import Data",
+      icon: "Upload",
+      type: "action",
       action: () => {
         onImportData?.();
         onClose();
-      }
-    },
-    { 
-      id: 'divider-2', 
-      type: 'divider' 
+      },
     },
     {
-      id: 'theme',
-      label: theme === 'light' ? 'Dark Mode' : 'Light Mode',
-      icon: theme === 'light' ? 'Moon' : 'Sun',
-      type: 'action',
+      id: "divider-2",
+      type: "divider",
+    },
+    {
+      id: "theme",
+      label: theme === "light" ? "Dark Mode" : "Light Mode",
+      icon: theme === "light" ? "Moon" : "Sun",
+      type: "action",
       action: () => {
         onThemeToggle?.();
-      }
+      },
     },
     {
-      id: 'help',
-      label: 'Help & Support',
-      icon: 'HelpCircle',
-      type: 'action',
+      id: "help",
+      label: "Help & Support",
+      icon: "HelpCircle",
+      type: "action",
       action: () => {
         // Open help modal or navigate to help page
         onClose();
-      }
-    }
+      },
+    },
   ];
 
   const getActionIcon = (iconName) => {
@@ -114,7 +127,7 @@ const MobileMenu = ({
       Upload,
       Moon,
       Sun,
-      HelpCircle
+      HelpCircle,
     };
     return icons[iconName] || HelpCircle;
   };
@@ -124,7 +137,7 @@ const MobileMenu = ({
   return (
     <div className="fixed inset-0 z-50 lg:hidden">
       {/* Backdrop */}
-      <div 
+      <div
         className="fixed inset-0 bg-black/50 backdrop-blur-sm transition-opacity"
         onClick={onClose}
         aria-hidden="true"
@@ -170,10 +183,10 @@ const MobileMenu = ({
                 )}
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
-                    {user.name || 'User'}
+                    {user.name || "User"}
                   </p>
                   <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
-                    {user.email || 'user@example.com'}
+                    {user.email || "user@example.com"}
                   </p>
                 </div>
               </div>
@@ -184,16 +197,16 @@ const MobileMenu = ({
           <nav className="flex-1 overflow-y-auto py-4">
             <div className="px-4 space-y-1">
               {menuItems.map((item) => {
-                if (item.type === 'divider') {
+                if (item.type === "divider") {
                   return (
-                    <div 
-                      key={item.id} 
-                      className="border-t border-gray-200 dark:border-gray-700 my-4" 
+                    <div
+                      key={item.id}
+                      className="border-t border-gray-200 dark:border-gray-700 my-4"
                     />
                   );
                 }
 
-                if (item.type === 'navigation') {
+                if (item.type === "navigation") {
                   const IconComponent = getIconComponent(item.icon);
                   const isActive = activeTab === item.id;
 
@@ -203,13 +216,17 @@ const MobileMenu = ({
                       onClick={() => handleTabChange(item.id)}
                       className={`w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-left transition-all duration-200 ${
                         isActive
-                          ? 'bg-indigo-50 dark:bg-indigo-900/50 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-700 shadow-sm'
-                          : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white'
+                          ? "bg-indigo-50 dark:bg-indigo-900/50 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-700 shadow-sm"
+                          : "text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white"
                       }`}
                     >
-                      <IconComponent className={`h-5 w-5 flex-shrink-0 ${
-                        isActive ? 'text-indigo-600 dark:text-indigo-400' : 'text-gray-400 dark:text-gray-500'
-                      }`} />
+                      <IconComponent
+                        className={`h-5 w-5 flex-shrink-0 ${
+                          isActive
+                            ? "text-indigo-600 dark:text-indigo-400"
+                            : "text-gray-400 dark:text-gray-500"
+                        }`}
+                      />
                       <div className="flex-1 min-w-0">
                         <p className="font-medium truncate">{item.label}</p>
                         {item.description && (
@@ -225,7 +242,7 @@ const MobileMenu = ({
                   );
                 }
 
-                if (item.type === 'action') {
+                if (item.type === "action") {
                   const IconComponent = getActionIcon(item.icon);
 
                   return (

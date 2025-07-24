@@ -1,24 +1,29 @@
-import React, { createContext, useContext, useReducer, useCallback } from 'react';
+import React, {
+  createContext,
+  useContext,
+  useReducer,
+  useCallback,
+} from "react";
 
 // Notification types
 export const NotificationTypes = {
-  SUCCESS: 'success',
-  ERROR: 'error',
-  WARNING: 'warning',
-  INFO: 'info'
+  SUCCESS: "success",
+  ERROR: "error",
+  WARNING: "warning",
+  INFO: "info",
 };
 
 // Action types
 const ActionTypes = {
-  ADD_NOTIFICATION: 'ADD_NOTIFICATION',
-  REMOVE_NOTIFICATION: 'REMOVE_NOTIFICATION',
-  CLEAR_ALL: 'CLEAR_ALL',
-  UPDATE_NOTIFICATION: 'UPDATE_NOTIFICATION'
+  ADD_NOTIFICATION: "ADD_NOTIFICATION",
+  REMOVE_NOTIFICATION: "REMOVE_NOTIFICATION",
+  CLEAR_ALL: "CLEAR_ALL",
+  UPDATE_NOTIFICATION: "UPDATE_NOTIFICATION",
 };
 
 // Initial state
 const initialState = {
-  notifications: []
+  notifications: [],
 };
 
 // Reducer
@@ -27,31 +32,31 @@ function notificationReducer(state, action) {
     case ActionTypes.ADD_NOTIFICATION:
       return {
         ...state,
-        notifications: [...state.notifications, action.payload]
+        notifications: [...state.notifications, action.payload],
       };
 
     case ActionTypes.REMOVE_NOTIFICATION:
       return {
         ...state,
         notifications: state.notifications.filter(
-          notification => notification.id !== action.payload
-        )
+          (notification) => notification.id !== action.payload,
+        ),
       };
 
     case ActionTypes.CLEAR_ALL:
       return {
         ...state,
-        notifications: []
+        notifications: [],
       };
 
     case ActionTypes.UPDATE_NOTIFICATION:
       return {
         ...state,
-        notifications: state.notifications.map(notification =>
+        notifications: state.notifications.map((notification) =>
           notification.id === action.payload.id
             ? { ...notification, ...action.payload.updates }
-            : notification
-        )
+            : notification,
+        ),
       };
 
     default:
@@ -74,12 +79,12 @@ export function NotificationProvider({ children }) {
       duration: 5000,
       dismissible: true,
       ...notification,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     };
 
     dispatch({
       type: ActionTypes.ADD_NOTIFICATION,
-      payload: newNotification
+      payload: newNotification,
     });
 
     // Auto-remove notification after duration
@@ -87,7 +92,7 @@ export function NotificationProvider({ children }) {
       setTimeout(() => {
         dispatch({
           type: ActionTypes.REMOVE_NOTIFICATION,
-          payload: id
+          payload: id,
         });
       }, newNotification.duration);
     }
@@ -98,7 +103,7 @@ export function NotificationProvider({ children }) {
   const removeNotification = useCallback((id) => {
     dispatch({
       type: ActionTypes.REMOVE_NOTIFICATION,
-      payload: id
+      payload: id,
     });
   }, []);
 
@@ -109,54 +114,69 @@ export function NotificationProvider({ children }) {
   const updateNotification = useCallback((id, updates) => {
     dispatch({
       type: ActionTypes.UPDATE_NOTIFICATION,
-      payload: { id, updates }
+      payload: { id, updates },
     });
   }, []);
 
   // Convenience methods for different notification types
-  const success = useCallback((message, options = {}) => {
-    return addNotification({
-      type: NotificationTypes.SUCCESS,
-      message,
-      ...options
-    });
-  }, [addNotification]);
+  const success = useCallback(
+    (message, options = {}) => {
+      return addNotification({
+        type: NotificationTypes.SUCCESS,
+        message,
+        ...options,
+      });
+    },
+    [addNotification],
+  );
 
-  const error = useCallback((message, options = {}) => {
-    return addNotification({
-      type: NotificationTypes.ERROR,
-      message,
-      duration: 8000, // Longer duration for errors
-      ...options
-    });
-  }, [addNotification]);
+  const error = useCallback(
+    (message, options = {}) => {
+      return addNotification({
+        type: NotificationTypes.ERROR,
+        message,
+        duration: 8000, // Longer duration for errors
+        ...options,
+      });
+    },
+    [addNotification],
+  );
 
-  const warning = useCallback((message, options = {}) => {
-    return addNotification({
-      type: NotificationTypes.WARNING,
-      message,
-      duration: 6000,
-      ...options
-    });
-  }, [addNotification]);
+  const warning = useCallback(
+    (message, options = {}) => {
+      return addNotification({
+        type: NotificationTypes.WARNING,
+        message,
+        duration: 6000,
+        ...options,
+      });
+    },
+    [addNotification],
+  );
 
-  const info = useCallback((message, options = {}) => {
-    return addNotification({
-      type: NotificationTypes.INFO,
-      message,
-      ...options
-    });
-  }, [addNotification]);
+  const info = useCallback(
+    (message, options = {}) => {
+      return addNotification({
+        type: NotificationTypes.INFO,
+        message,
+        ...options,
+      });
+    },
+    [addNotification],
+  );
 
   // Persistent notifications (don't auto-dismiss)
-  const persistent = useCallback((message, type = NotificationTypes.INFO, options = {}) => {
-    return addNotification({
-      type,
-      message,
-      duration: 0, // Don't auto-dismiss
-      ...options
-    });
-  }, [addNotification]);
+  const persistent = useCallback(
+    (message, type = NotificationTypes.INFO, options = {}) => {
+      return addNotification({
+        type,
+        message,
+        duration: 0, // Don't auto-dismiss
+        ...options,
+      });
+    },
+    [addNotification],
+  );
 
   const contextValue = {
     notifications: state.notifications,
@@ -168,7 +188,7 @@ export function NotificationProvider({ children }) {
     error,
     warning,
     info,
-    persistent
+    persistent,
   };
 
   return (
@@ -182,7 +202,9 @@ export function NotificationProvider({ children }) {
 export function useNotifications() {
   const context = useContext(NotificationContext);
   if (!context) {
-    throw new Error('useNotifications must be used within a NotificationProvider');
+    throw new Error(
+      "useNotifications must be used within a NotificationProvider",
+    );
   }
   return context;
 }
@@ -191,42 +213,71 @@ export function useNotifications() {
 export function useActionNotifications() {
   const { success, error, warning, info } = useNotifications();
 
-  const notifySuccess = useCallback((action, entity) => {
-    success(`${entity} ${action} successfully!`);
-  }, [success]);
+  const notifySuccess = useCallback(
+    (action, entity) => {
+      success(`${entity} ${action} successfully!`);
+    },
+    [success],
+  );
 
-  const notifyError = useCallback((action, entity, errorMessage) => {
-    error(`Failed to ${action} ${entity}${errorMessage ? `: ${errorMessage}` : ''}`);
-  }, [error]);
+  const notifyError = useCallback(
+    (action, entity, errorMessage) => {
+      error(
+        `Failed to ${action} ${entity}${errorMessage ? `: ${errorMessage}` : ""}`,
+      );
+    },
+    [error],
+  );
 
-  const notifyValidationError = useCallback((errors) => {
-    const errorMessage = Array.isArray(errors) ? errors.join(', ') : errors;
-    error(`Validation failed: ${errorMessage}`);
-  }, [error]);
+  const notifyValidationError = useCallback(
+    (errors) => {
+      const errorMessage = Array.isArray(errors) ? errors.join(", ") : errors;
+      error(`Validation failed: ${errorMessage}`);
+    },
+    [error],
+  );
 
   const notifyNetworkError = useCallback(() => {
-    error('Network error. Please check your connection and try again.');
+    error("Network error. Please check your connection and try again.");
   }, [error]);
 
   const notifyUnsavedChanges = useCallback(() => {
-    warning('You have unsaved changes. Please save or discard them before continuing.');
+    warning(
+      "You have unsaved changes. Please save or discard them before continuing.",
+    );
   }, [warning]);
 
-  const notifyFeatureUnavailable = useCallback((feature) => {
-    info(`${feature} feature is coming soon!`);
-  }, [info]);
+  const notifyFeatureUnavailable = useCallback(
+    (feature) => {
+      info(`${feature} feature is coming soon!`);
+    },
+    [info],
+  );
 
-  const notifyDataExported = useCallback((filename) => {
-    success(`Data exported successfully${filename ? ` as ${filename}` : ''}!`);
-  }, [success]);
+  const notifyDataExported = useCallback(
+    (filename) => {
+      success(
+        `Data exported successfully${filename ? ` as ${filename}` : ""}!`,
+      );
+    },
+    [success],
+  );
 
-  const notifyDataImported = useCallback((itemCount) => {
-    success(`Successfully imported ${itemCount} items!`);
-  }, [success]);
+  const notifyDataImported = useCallback(
+    (itemCount) => {
+      success(`Successfully imported ${itemCount} items!`);
+    },
+    [success],
+  );
 
-  const notifyBulkAction = useCallback((action, count, entity) => {
-    success(`Successfully ${action} ${count} ${entity}${count !== 1 ? 's' : ''}!`);
-  }, [success]);
+  const notifyBulkAction = useCallback(
+    (action, count, entity) => {
+      success(
+        `Successfully ${action} ${count} ${entity}${count !== 1 ? "s" : ""}!`,
+      );
+    },
+    [success],
+  );
 
   return {
     notifySuccess,
@@ -237,7 +288,7 @@ export function useActionNotifications() {
     notifyFeatureUnavailable,
     notifyDataExported,
     notifyDataImported,
-    notifyBulkAction
+    notifyBulkAction,
   };
 }
 
@@ -245,51 +296,54 @@ export function useActionNotifications() {
 export function useAsyncNotifications() {
   const { success, error, info } = useNotifications();
 
-  const withLoadingNotification = useCallback(async (
-    asyncOperation,
-    {
-      loadingMessage = 'Processing...',
-      successMessage = 'Operation completed successfully!',
-      errorMessage = 'Operation failed',
-      showLoading = true
-    } = {}
-  ) => {
-    let loadingId = null;
+  const withLoadingNotification = useCallback(
+    async (
+      asyncOperation,
+      {
+        loadingMessage = "Processing...",
+        successMessage = "Operation completed successfully!",
+        errorMessage = "Operation failed",
+        showLoading = true,
+      } = {},
+    ) => {
+      let loadingId = null;
 
-    try {
-      // Show loading notification
-      if (showLoading) {
-        loadingId = info(loadingMessage, { duration: 0 });
+      try {
+        // Show loading notification
+        if (showLoading) {
+          loadingId = info(loadingMessage, { duration: 0 });
+        }
+
+        // Execute the async operation
+        const result = await asyncOperation();
+
+        // Remove loading notification
+        if (loadingId) {
+          // Note: In a real implementation, you'd have access to removeNotification here
+          // For now, we'll just let it auto-expire with a short duration
+        }
+
+        // Show success notification
+        if (successMessage) {
+          success(successMessage);
+        }
+
+        return { success: true, data: result };
+      } catch (err) {
+        // Remove loading notification
+        if (loadingId) {
+          // Note: In a real implementation, you'd remove the loading notification here
+        }
+
+        // Show error notification
+        const finalErrorMessage = err.message || errorMessage;
+        error(finalErrorMessage);
+
+        return { success: false, error: err };
       }
-
-      // Execute the async operation
-      const result = await asyncOperation();
-
-      // Remove loading notification
-      if (loadingId) {
-        // Note: In a real implementation, you'd have access to removeNotification here
-        // For now, we'll just let it auto-expire with a short duration
-      }
-
-      // Show success notification
-      if (successMessage) {
-        success(successMessage);
-      }
-
-      return { success: true, data: result };
-    } catch (err) {
-      // Remove loading notification
-      if (loadingId) {
-        // Note: In a real implementation, you'd remove the loading notification here
-      }
-
-      // Show error notification
-      const finalErrorMessage = err.message || errorMessage;
-      error(finalErrorMessage);
-
-      return { success: false, error: err };
-    }
-  }, [success, error, info]);
+    },
+    [success, error, info],
+  );
 
   return { withLoadingNotification };
 }
@@ -298,34 +352,43 @@ export function useAsyncNotifications() {
 export function useFormNotifications() {
   const { error, success } = useNotifications();
 
-  const notifyValidationErrors = useCallback((errors) => {
-    if (typeof errors === 'object' && !Array.isArray(errors)) {
-      // Handle object of field errors
-      const errorMessages = Object.entries(errors)
-        .map(([field, message]) => `${field}: ${message}`)
-        .join(', ');
-      error(`Please fix the following errors: ${errorMessages}`);
-    } else if (Array.isArray(errors)) {
-      // Handle array of error messages
-      error(`Please fix the following errors: ${errors.join(', ')}`);
-    } else {
-      // Handle single error message
-      error(errors);
-    }
-  }, [error]);
+  const notifyValidationErrors = useCallback(
+    (errors) => {
+      if (typeof errors === "object" && !Array.isArray(errors)) {
+        // Handle object of field errors
+        const errorMessages = Object.entries(errors)
+          .map(([field, message]) => `${field}: ${message}`)
+          .join(", ");
+        error(`Please fix the following errors: ${errorMessages}`);
+      } else if (Array.isArray(errors)) {
+        // Handle array of error messages
+        error(`Please fix the following errors: ${errors.join(", ")}`);
+      } else {
+        // Handle single error message
+        error(errors);
+      }
+    },
+    [error],
+  );
 
-  const notifyFormSuccess = useCallback((action = 'saved') => {
-    success(`Form ${action} successfully!`);
-  }, [success]);
+  const notifyFormSuccess = useCallback(
+    (action = "saved") => {
+      success(`Form ${action} successfully!`);
+    },
+    [success],
+  );
 
-  const notifyFieldError = useCallback((field, message) => {
-    error(`${field}: ${message}`);
-  }, [error]);
+  const notifyFieldError = useCallback(
+    (field, message) => {
+      error(`${field}: ${message}`);
+    },
+    [error],
+  );
 
   return {
     notifyValidationErrors,
     notifyFormSuccess,
-    notifyFieldError
+    notifyFieldError,
   };
 }
 

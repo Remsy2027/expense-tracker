@@ -1,14 +1,20 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { Calendar, ChevronLeft, ChevronRight, Clock, RotateCcw } from 'lucide-react';
-import { formatDate, isToday, isThisMonth } from '../../utils/helpers';
+import React, { useState, useRef, useEffect } from "react";
+import {
+  Calendar,
+  ChevronLeft,
+  ChevronRight,
+  Clock,
+  RotateCcw,
+} from "lucide-react";
+import { formatDate, isToday, isThisMonth } from "../../utils/helpers";
 
-const DateSelector = ({ 
-  currentDate, 
-  onDateChange, 
+const DateSelector = ({
+  currentDate,
+  onDateChange,
   onQuickDate,
   showQuickDates = true,
   showCalendar = true,
-  className = ''
+  className = "",
 }) => {
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [selectedMonth, setSelectedMonth] = useState(new Date(currentDate));
@@ -17,13 +23,16 @@ const DateSelector = ({
   // Close date picker when clicking outside
   useEffect(() => {
     const handleClickOutside = (event) => {
-      if (datePickerRef.current && !datePickerRef.current.contains(event.target)) {
+      if (
+        datePickerRef.current &&
+        !datePickerRef.current.contains(event.target)
+      ) {
         setShowDatePicker(false);
       }
     };
 
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
   // Update selected month when current date changes
@@ -33,30 +42,30 @@ const DateSelector = ({
 
   // Quick date options
   const quickDateOptions = [
-    { 
-      label: 'Today', 
-      days: 0, 
+    {
+      label: "Today",
+      days: 0,
       icon: Clock,
-      active: isToday(currentDate)
+      active: isToday(currentDate),
     },
-    { 
-      label: 'Yesterday', 
-      days: -1, 
+    {
+      label: "Yesterday",
+      days: -1,
       icon: RotateCcw,
-      active: false
+      active: false,
     },
-    { 
-      label: 'Last Week', 
-      days: -7, 
+    {
+      label: "Last Week",
+      days: -7,
       icon: RotateCcw,
-      active: false
+      active: false,
     },
-    { 
-      label: 'Last Month', 
-      days: -30, 
+    {
+      label: "Last Month",
+      days: -30,
       icon: RotateCcw,
-      active: false
-    }
+      active: false,
+    },
   ];
 
   const handleQuickDate = (days, option) => {
@@ -75,7 +84,7 @@ const DateSelector = ({
   };
 
   const selectDate = (date) => {
-    const dateString = date.toISOString().split('T')[0];
+    const dateString = date.toISOString().split("T")[0];
     onDateChange(dateString);
     setShowDatePicker(false);
   };
@@ -89,17 +98,17 @@ const DateSelector = ({
     const startingDayOfWeek = firstDay.getDay();
 
     const days = [];
-    
+
     // Add empty cells for days before the first day of the month
     for (let i = 0; i < startingDayOfWeek; i++) {
       days.push(null);
     }
-    
+
     // Add days of the month
     for (let day = 1; day <= daysInMonth; day++) {
       days.push(new Date(year, month, day));
     }
-    
+
     return days;
   };
 
@@ -110,32 +119,34 @@ const DateSelector = ({
     yesterday.setDate(yesterday.getDate() - 1);
 
     if (isToday(dateString)) {
-      return `Today, ${formatDate(date, 'MMM dd')}`;
+      return `Today, ${formatDate(date, "MMM dd")}`;
     } else if (date.toDateString() === yesterday.toDateString()) {
-      return `Yesterday, ${formatDate(date, 'MMM dd')}`;
+      return `Yesterday, ${formatDate(date, "MMM dd")}`;
     } else if (isThisMonth(dateString)) {
-      return formatDate(date, 'dd MMM');
+      return formatDate(date, "dd MMM");
     } else {
-      return formatDate(date, 'dd MMM yyyy');
+      return formatDate(date, "dd MMM yyyy");
     }
   };
 
   const getDayStatus = (date) => {
-    const dateString = date.toISOString().split('T')[0];
-    const today = new Date().toISOString().split('T')[0];
-    
+    const dateString = date.toISOString().split("T")[0];
+    const today = new Date().toISOString().split("T")[0];
+
     if (dateString === currentDate) {
-      return 'selected';
+      return "selected";
     } else if (dateString === today) {
-      return 'today';
+      return "today";
     } else if (date > new Date()) {
-      return 'future';
+      return "future";
     }
-    return 'past';
+    return "past";
   };
 
   return (
-    <div className={`bg-white rounded-xl shadow-sm border border-gray-200 p-6 ${className}`}>
+    <div
+      className={`bg-white rounded-xl shadow-sm border border-gray-200 p-6 ${className}`}
+    >
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         {/* Date Display and Picker */}
         <div className="flex items-center space-x-4">
@@ -143,7 +154,7 @@ const DateSelector = ({
             <Calendar className="h-5 w-5" />
             <span className="text-sm font-medium">Selected Date:</span>
           </div>
-          
+
           <div className="relative" ref={datePickerRef}>
             <button
               onClick={() => setShowDatePicker(!showDatePicker)}
@@ -152,7 +163,9 @@ const DateSelector = ({
               <span className="font-semibold text-gray-900">
                 {formatDisplayDate(currentDate)}
               </span>
-              <ChevronRight className={`h-4 w-4 text-gray-400 transition-transform ${showDatePicker ? 'rotate-90' : ''}`} />
+              <ChevronRight
+                className={`h-4 w-4 text-gray-400 transition-transform ${showDatePicker ? "rotate-90" : ""}`}
+              />
             </button>
 
             {/* Custom Date Picker */}
@@ -167,7 +180,10 @@ const DateSelector = ({
                     <ChevronLeft className="h-4 w-4" />
                   </button>
                   <h3 className="font-semibold text-gray-900">
-                    {selectedMonth.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
+                    {selectedMonth.toLocaleDateString("en-US", {
+                      month: "long",
+                      year: "numeric",
+                    })}
                   </h3>
                   <button
                     onClick={() => navigateMonth(1)}
@@ -179,11 +195,16 @@ const DateSelector = ({
 
                 {/* Week Days Header */}
                 <div className="grid grid-cols-7 gap-1 mb-2">
-                  {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => (
-                    <div key={day} className="text-center text-xs font-medium text-gray-500 py-2">
-                      {day}
-                    </div>
-                  ))}
+                  {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map(
+                    (day) => (
+                      <div
+                        key={day}
+                        className="text-center text-xs font-medium text-gray-500 py-2"
+                      >
+                        {day}
+                      </div>
+                    ),
+                  )}
                 </div>
 
                 {/* Calendar Days */}
@@ -194,20 +215,23 @@ const DateSelector = ({
                     }
 
                     const status = getDayStatus(date);
-                    const baseClasses = "aspect-square flex items-center justify-center text-sm rounded-lg transition-all duration-200 cursor-pointer";
-                    
+                    const baseClasses =
+                      "aspect-square flex items-center justify-center text-sm rounded-lg transition-all duration-200 cursor-pointer";
+
                     let classes = baseClasses;
                     switch (status) {
-                      case 'selected':
-                        classes += " bg-indigo-600 text-white font-semibold shadow-sm";
+                      case "selected":
+                        classes +=
+                          " bg-indigo-600 text-white font-semibold shadow-sm";
                         break;
-                      case 'today':
-                        classes += " bg-indigo-100 text-indigo-700 font-medium border border-indigo-300";
+                      case "today":
+                        classes +=
+                          " bg-indigo-100 text-indigo-700 font-medium border border-indigo-300";
                         break;
-                      case 'future':
+                      case "future":
                         classes += " text-gray-300 cursor-not-allowed";
                         break;
-                      case 'past':
+                      case "past":
                       default:
                         classes += " text-gray-700 hover:bg-gray-100";
                         break;
@@ -216,8 +240,8 @@ const DateSelector = ({
                     return (
                       <button
                         key={index}
-                        onClick={() => status !== 'future' && selectDate(date)}
-                        disabled={status === 'future'}
+                        onClick={() => status !== "future" && selectDate(date)}
+                        disabled={status === "future"}
                         className={classes}
                       >
                         {date.getDate()}
@@ -231,7 +255,7 @@ const DateSelector = ({
                   <div className="flex justify-between items-center">
                     <button
                       onClick={() => {
-                        onDateChange(new Date().toISOString().split('T')[0]);
+                        onDateChange(new Date().toISOString().split("T")[0]);
                         setShowDatePicker(false);
                       }}
                       className="text-sm text-indigo-600 hover:text-indigo-700 font-medium"
@@ -242,7 +266,7 @@ const DateSelector = ({
                       type="date"
                       value={currentDate}
                       onChange={handleDateChange}
-                      max={new Date().toISOString().split('T')[0]}
+                      max={new Date().toISOString().split("T")[0]}
                       className="text-sm border border-gray-300 rounded px-2 py-1"
                     />
                   </div>
@@ -263,8 +287,8 @@ const DateSelector = ({
                   onClick={() => handleQuickDate(option.days, option)}
                   className={`flex items-center space-x-2 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
                     option.active
-                      ? 'bg-indigo-600 text-white shadow-sm'
-                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200 hover:text-gray-900'
+                      ? "bg-indigo-600 text-white shadow-sm"
+                      : "bg-gray-100 text-gray-700 hover:bg-gray-200 hover:text-gray-900"
                   }`}
                 >
                   <IconComponent className="h-4 w-4" />
@@ -282,20 +306,22 @@ const DateSelector = ({
           <div className="flex items-center space-x-2">
             <div className="w-2 h-2 bg-green-500 rounded-full"></div>
             <span>
-              {isToday(currentDate) ? 'Today' : 
-               isThisMonth(currentDate) ? 'This Month' : 
-               'Past Date'}
+              {isToday(currentDate)
+                ? "Today"
+                : isThisMonth(currentDate)
+                  ? "This Month"
+                  : "Past Date"}
             </span>
           </div>
-          
+
           <div className="flex items-center space-x-2">
             <Clock className="h-4 w-4" />
             <span>
-              {new Date(currentDate).toLocaleDateString('en-US', { 
-                weekday: 'long',
-                year: 'numeric', 
-                month: 'long', 
-                day: 'numeric' 
+              {new Date(currentDate).toLocaleDateString("en-US", {
+                weekday: "long",
+                year: "numeric",
+                month: "long",
+                day: "numeric",
               })}
             </span>
           </div>
@@ -306,10 +332,10 @@ const DateSelector = ({
 };
 
 // Compact version for smaller spaces
-export const CompactDateSelector = ({ 
-  currentDate, 
-  onDateChange, 
-  onQuickDate 
+export const CompactDateSelector = ({
+  currentDate,
+  onDateChange,
+  onQuickDate,
 }) => {
   return (
     <div className="flex items-center space-x-2">
@@ -317,17 +343,17 @@ export const CompactDateSelector = ({
         type="date"
         value={currentDate}
         onChange={(e) => onDateChange(e.target.value)}
-        max={new Date().toISOString().split('T')[0]}
+        max={new Date().toISOString().split("T")[0]}
         className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm"
       />
-      
+
       <div className="flex space-x-1">
         <button
           onClick={() => onQuickDate(0)}
           className={`px-2 py-2 text-xs font-medium rounded-lg transition-colors ${
             isToday(currentDate)
-              ? 'bg-indigo-600 text-white'
-              : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+              ? "bg-indigo-600 text-white"
+              : "bg-gray-100 text-gray-700 hover:bg-gray-200"
           }`}
         >
           Today
@@ -344,12 +370,12 @@ export const CompactDateSelector = ({
 };
 
 // Range date selector for future use
-export const DateRangeSelector = ({ 
-  startDate, 
-  endDate, 
-  onStartDateChange, 
+export const DateRangeSelector = ({
+  startDate,
+  endDate,
+  onStartDateChange,
   onEndDateChange,
-  className = '' 
+  className = "",
 }) => {
   return (
     <div className={`flex items-center space-x-4 ${className}`}>
@@ -362,7 +388,7 @@ export const DateRangeSelector = ({
           className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm"
         />
       </div>
-      
+
       <div className="flex flex-col">
         <label className="text-xs font-medium text-gray-600 mb-1">To</label>
         <input
@@ -370,7 +396,7 @@ export const DateRangeSelector = ({
           value={endDate}
           onChange={(e) => onEndDateChange(e.target.value)}
           min={startDate}
-          max={new Date().toISOString().split('T')[0]}
+          max={new Date().toISOString().split("T")[0]}
           className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm"
         />
       </div>

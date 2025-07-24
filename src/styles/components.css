@@ -9,18 +9,18 @@
   @apply focus:outline-none focus:ring-2 focus:ring-offset-2;
   @apply disabled:opacity-50 disabled:cursor-not-allowed;
   @apply relative overflow-hidden;
-  
+
   /* Button hover effect */
   &::before {
-    content: '';
+    content: "";
     @apply absolute inset-0 bg-white opacity-0;
     @apply transition-opacity duration-200;
   }
-  
+
   &:hover::before {
     @apply opacity-10;
   }
-  
+
   /* Button active state */
   &:active {
     @apply transform scale-95;
@@ -119,7 +119,7 @@
   @apply transition-all duration-200;
   @apply focus:ring-2 focus:ring-indigo-500 focus:border-transparent;
   @apply appearance-none;
-  
+
   background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e");
   background-position: right 0.5rem center;
   background-repeat: no-repeat;
@@ -240,7 +240,7 @@
 }
 
 .nav-tab::after {
-  content: '';
+  content: "";
   @apply absolute bottom-0 left-0 w-full h-0.5;
   @apply bg-indigo-600 transform scale-x-0;
   @apply transition-transform duration-200;
@@ -358,14 +358,30 @@
 }
 
 /* Expense Category Colors */
-.category-food { @apply bg-red-500; }
-.category-transport { @apply bg-cyan-500; }
-.category-shopping { @apply bg-blue-500; }
-.category-bills { @apply bg-green-500; }
-.category-entertainment { @apply bg-yellow-500; }
-.category-medical { @apply bg-pink-500; }
-.category-education { @apply bg-purple-500; }
-.category-other { @apply bg-gray-500; }
+.category-food {
+  @apply bg-red-500;
+}
+.category-transport {
+  @apply bg-cyan-500;
+}
+.category-shopping {
+  @apply bg-blue-500;
+}
+.category-bills {
+  @apply bg-green-500;
+}
+.category-entertainment {
+  @apply bg-yellow-500;
+}
+.category-medical {
+  @apply bg-pink-500;
+}
+.category-education {
+  @apply bg-purple-500;
+}
+.category-other {
+  @apply bg-gray-500;
+}
 
 /* Summary Cards */
 .summary-card {
@@ -377,7 +393,7 @@
 }
 
 .summary-card::before {
-  content: '';
+  content: "";
   @apply absolute top-0 right-0 w-24 h-24;
   @apply bg-gradient-to-br from-white/20 to-transparent;
   @apply rounded-full transform translate-x-8 -translate-y-8;

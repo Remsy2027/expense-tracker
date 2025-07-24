@@ -1,27 +1,23 @@
-import React, { useState } from 'react';
-import { 
-  Calendar, 
-  TrendingUp, 
-  TrendingDown, 
-  Target, 
-  AlertCircle, 
+import React, { useState } from "react";
+import {
+  Calendar,
+  TrendingUp,
+  TrendingDown,
+  Target,
+  AlertCircle,
   CheckCircle,
   DollarSign,
   PieChart,
   BarChart3,
   Settings,
   Plus,
-  X
-} from 'lucide-react';
-import { formatCurrency, getDaysInMonth } from '../../utils/helpers';
-import MonthlyProgress from './MonthlyProgress';
-import BudgetCards from './BudgetCards';
+  X,
+} from "lucide-react";
+import { formatCurrency, getDaysInMonth } from "../../utils/helpers";
+import MonthlyProgress from "./MonthlyProgress";
+import BudgetCards from "./BudgetCards";
 
-const BudgetOverview = ({ 
-  calculations, 
-  currentDate,
-  className = ""
-}) => {
+const BudgetOverview = ({ calculations, currentDate, className = "" }) => {
   const [showBudgetSetup, setShowBudgetSetup] = useState(false);
   const [budgetGoals, setBudgetGoals] = useState({
     monthlyIncome: 50000,
@@ -35,8 +31,8 @@ const BudgetOverview = ({
       Entertainment: 3000,
       Medical: 2000,
       Education: 2000,
-      Other: 3000
-    }
+      Other: 3000,
+    },
   });
 
   // Calculate current month data
@@ -48,51 +44,72 @@ const BudgetOverview = ({
 
   // Calculate budget performance
   const budgetPerformance = {
-    incomeProgress: calculations.monthlyIncome / budgetGoals.monthlyIncome * 100,
-    expenseProgress: calculations.monthlyExpenses / budgetGoals.monthlyExpenses * 100,
-    savingsProgress: calculations.monthlySavings / budgetGoals.savingsTarget * 100,
-    
+    incomeProgress:
+      (calculations.monthlyIncome / budgetGoals.monthlyIncome) * 100,
+    expenseProgress:
+      (calculations.monthlyExpenses / budgetGoals.monthlyExpenses) * 100,
+    savingsProgress:
+      (calculations.monthlySavings / budgetGoals.savingsTarget) * 100,
+
     // Projected end-of-month figures
     projectedIncome: (calculations.monthlyIncome / currentDay) * daysInMonth,
-    projectedExpenses: (calculations.monthlyExpenses / currentDay) * daysInMonth,
-    
+    projectedExpenses:
+      (calculations.monthlyExpenses / currentDay) * daysInMonth,
+
     // Budget status
-    incomeOnTrack: (calculations.monthlyIncome / currentDay * daysInMonth) >= budgetGoals.monthlyIncome,
-    expenseOnTrack: (calculations.monthlyExpenses / currentDay * daysInMonth) <= budgetGoals.monthlyExpenses,
-    savingsOnTrack: calculations.monthlySavings >= (budgetGoals.savingsTarget * currentDay / daysInMonth)
+    incomeOnTrack:
+      (calculations.monthlyIncome / currentDay) * daysInMonth >=
+      budgetGoals.monthlyIncome,
+    expenseOnTrack:
+      (calculations.monthlyExpenses / currentDay) * daysInMonth <=
+      budgetGoals.monthlyExpenses,
+    savingsOnTrack:
+      calculations.monthlySavings >=
+      (budgetGoals.savingsTarget * currentDay) / daysInMonth,
   };
 
   const budgetStatus = {
-    overall: budgetPerformance.incomeOnTrack && budgetPerformance.expenseOnTrack ? 'good' : 
-             budgetPerformance.expenseProgress > 100 ? 'danger' : 'warning',
-    message: budgetPerformance.incomeOnTrack && budgetPerformance.expenseOnTrack 
-      ? 'You\'re on track with your budget!' 
-      : budgetPerformance.expenseProgress > 100 
-        ? 'You\'ve exceeded your expense budget'
-        : 'Monitor your spending to stay on budget'
+    overall:
+      budgetPerformance.incomeOnTrack && budgetPerformance.expenseOnTrack
+        ? "good"
+        : budgetPerformance.expenseProgress > 100
+          ? "danger"
+          : "warning",
+    message:
+      budgetPerformance.incomeOnTrack && budgetPerformance.expenseOnTrack
+        ? "You're on track with your budget!"
+        : budgetPerformance.expenseProgress > 100
+          ? "You've exceeded your expense budget"
+          : "Monitor your spending to stay on budget",
   };
 
   // Category budget analysis
-  const categoryBudgetAnalysis = Object.entries(budgetGoals.categories).map(([category, budget]) => {
-    const spent = calculations.categoryTotals[category] || 0;
-    const progress = (spent / budget) * 100;
-    const dailyBudget = budget / daysInMonth;
-    const projectedSpent = (spent / currentDay) * daysInMonth;
-    
-    return {
-      category,
-      budget,
-      spent,
-      remaining: Math.max(0, budget - spent),
-      progress: Math.min(progress, 100),
-      overBudget: spent > budget,
-      onTrack: projectedSpent <= budget,
-      dailyBudget,
-      projectedSpent,
-      status: spent > budget ? 'danger' : 
-              projectedSpent > budget ? 'warning' : 'good'
-    };
-  }).sort((a, b) => b.progress - a.progress);
+  const categoryBudgetAnalysis = Object.entries(budgetGoals.categories)
+    .map(([category, budget]) => {
+      const spent = calculations.categoryTotals[category] || 0;
+      const progress = (spent / budget) * 100;
+      const dailyBudget = budget / daysInMonth;
+      const projectedSpent = (spent / currentDay) * daysInMonth;
+
+      return {
+        category,
+        budget,
+        spent,
+        remaining: Math.max(0, budget - spent),
+        progress: Math.min(progress, 100),
+        overBudget: spent > budget,
+        onTrack: projectedSpent <= budget,
+        dailyBudget,
+        projectedSpent,
+        status:
+          spent > budget
+            ? "danger"
+            : projectedSpent > budget
+              ? "warning"
+              : "good",
+      };
+    })
+    .sort((a, b) => b.progress - a.progress);
 
   const handleBudgetSave = (newGoals) => {
     setBudgetGoals(newGoals);
@@ -107,16 +124,19 @@ const BudgetOverview = ({
           <div>
             <div className="flex items-center space-x-2 mb-2">
               <Calendar className="h-6 w-6 text-indigo-600" />
-              <h2 className="text-2xl font-bold text-gray-900">Monthly Budget</h2>
+              <h2 className="text-2xl font-bold text-gray-900">
+                Monthly Budget
+              </h2>
             </div>
             <p className="text-gray-600">
-              {new Date(currentDate).toLocaleDateString('en-US', { 
-                month: 'long', 
-                year: 'numeric' 
-              })} - Day {currentDay} of {daysInMonth}
+              {new Date(currentDate).toLocaleDateString("en-US", {
+                month: "long",
+                year: "numeric",
+              })}{" "}
+              - Day {currentDay} of {daysInMonth}
             </p>
           </div>
-          
+
           <button
             onClick={() => setShowBudgetSetup(true)}
             className="flex items-center space-x-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
@@ -127,28 +147,36 @@ const BudgetOverview = ({
         </div>
 
         {/* Budget Status Alert */}
-        <div className={`mt-4 p-4 rounded-lg border ${
-          budgetStatus.overall === 'good' 
-            ? 'bg-green-50 border-green-200' 
-            : budgetStatus.overall === 'danger'
-              ? 'bg-red-50 border-red-200'
-              : 'bg-yellow-50 border-yellow-200'
-        }`}>
+        <div
+          className={`mt-4 p-4 rounded-lg border ${
+            budgetStatus.overall === "good"
+              ? "bg-green-50 border-green-200"
+              : budgetStatus.overall === "danger"
+                ? "bg-red-50 border-red-200"
+                : "bg-yellow-50 border-yellow-200"
+          }`}
+        >
           <div className="flex items-center space-x-2">
-            {budgetStatus.overall === 'good' ? (
+            {budgetStatus.overall === "good" ? (
               <CheckCircle className="h-5 w-5 text-green-600" />
             ) : (
-              <AlertCircle className={`h-5 w-5 ${
-                budgetStatus.overall === 'danger' ? 'text-red-600' : 'text-yellow-600'
-              }`} />
+              <AlertCircle
+                className={`h-5 w-5 ${
+                  budgetStatus.overall === "danger"
+                    ? "text-red-600"
+                    : "text-yellow-600"
+                }`}
+              />
             )}
-            <p className={`font-medium ${
-              budgetStatus.overall === 'good' 
-                ? 'text-green-800' 
-                : budgetStatus.overall === 'danger'
-                  ? 'text-red-800'
-                  : 'text-yellow-800'
-            }`}>
+            <p
+              className={`font-medium ${
+                budgetStatus.overall === "good"
+                  ? "text-green-800"
+                  : budgetStatus.overall === "danger"
+                    ? "text-red-800"
+                    : "text-yellow-800"
+              }`}
+            >
               {budgetStatus.message}
             </p>
           </div>
@@ -179,31 +207,43 @@ const BudgetOverview = ({
             Category Budget Tracking
           </h3>
           <span className="text-sm text-gray-500">
-            {categoryBudgetAnalysis.filter(c => c.overBudget).length} over budget
+            {categoryBudgetAnalysis.filter((c) => c.overBudget).length} over
+            budget
           </span>
         </div>
 
         <div className="space-y-4">
           {categoryBudgetAnalysis.map((category) => (
-            <div key={category.category} className="border border-gray-200 rounded-lg p-4">
+            <div
+              key={category.category}
+              className="border border-gray-200 rounded-lg p-4"
+            >
               <div className="flex items-center justify-between mb-3">
                 <div className="flex items-center space-x-3">
-                  <h4 className="font-medium text-gray-900">{category.category}</h4>
-                  <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                    category.status === 'good' 
-                      ? 'bg-green-100 text-green-700'
-                      : category.status === 'warning'
-                        ? 'bg-yellow-100 text-yellow-700'
-                        : 'bg-red-100 text-red-700'
-                  }`}>
-                    {category.overBudget ? 'Over Budget' : 
-                     category.onTrack ? 'On Track' : 'At Risk'}
+                  <h4 className="font-medium text-gray-900">
+                    {category.category}
+                  </h4>
+                  <span
+                    className={`px-2 py-1 rounded-full text-xs font-medium ${
+                      category.status === "good"
+                        ? "bg-green-100 text-green-700"
+                        : category.status === "warning"
+                          ? "bg-yellow-100 text-yellow-700"
+                          : "bg-red-100 text-red-700"
+                    }`}
+                  >
+                    {category.overBudget
+                      ? "Over Budget"
+                      : category.onTrack
+                        ? "On Track"
+                        : "At Risk"}
                   </span>
                 </div>
-                
+
                 <div className="text-right">
                   <p className="font-semibold text-gray-900">
-                    {formatCurrency(category.spent)} / {formatCurrency(category.budget)}
+                    {formatCurrency(category.spent)} /{" "}
+                    {formatCurrency(category.budget)}
                   </p>
                   <p className="text-sm text-gray-500">
                     {formatCurrency(category.remaining)} remaining
@@ -220,11 +260,11 @@ const BudgetOverview = ({
                 <div className="w-full bg-gray-200 rounded-full h-2">
                   <div
                     className={`h-2 rounded-full transition-all duration-300 ${
-                      category.status === 'good' 
-                        ? 'bg-green-500'
-                        : category.status === 'warning'
-                          ? 'bg-yellow-500'
-                          : 'bg-red-500'
+                      category.status === "good"
+                        ? "bg-green-500"
+                        : category.status === "warning"
+                          ? "bg-yellow-500"
+                          : "bg-red-500"
                     }`}
                     style={{ width: `${Math.min(category.progress, 100)}%` }}
                   />
@@ -235,13 +275,19 @@ const BudgetOverview = ({
               <div className="grid grid-cols-2 gap-4 text-sm">
                 <div>
                   <p className="text-gray-600">Daily Budget</p>
-                  <p className="font-medium">{formatCurrency(category.dailyBudget)}</p>
+                  <p className="font-medium">
+                    {formatCurrency(category.dailyBudget)}
+                  </p>
                 </div>
                 <div>
                   <p className="text-gray-600">Projected Total</p>
-                  <p className={`font-medium ${
-                    category.projectedSpent > category.budget ? 'text-red-600' : 'text-gray-900'
-                  }`}>
+                  <p
+                    className={`font-medium ${
+                      category.projectedSpent > category.budget
+                        ? "text-red-600"
+                        : "text-gray-900"
+                    }`}
+                  >
                     {formatCurrency(category.projectedSpent)}
                   </p>
                 </div>
@@ -257,7 +303,7 @@ const BudgetOverview = ({
           <Target className="h-5 w-5 mr-2" />
           Budget Tips & Insights
         </h3>
-        
+
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="space-y-3">
             <h4 className="font-medium text-blue-800">Smart Saving Tips</h4>
@@ -268,12 +314,15 @@ const BudgetOverview = ({
               <li>• Use the 50/30/20 rule: needs, wants, savings</li>
             </ul>
           </div>
-          
+
           <div className="space-y-3">
             <h4 className="font-medium text-blue-800">This Month's Focus</h4>
             <div className="space-y-2 text-sm text-blue-700">
               {budgetPerformance.expenseProgress > 80 && (
-                <p>• Monitor your spending closely - you're at {budgetPerformance.expenseProgress.toFixed(0)}% of budget</p>
+                <p>
+                  • Monitor your spending closely - you're at{" "}
+                  {budgetPerformance.expenseProgress.toFixed(0)}% of budget
+                </p>
               )}
               {budgetPerformance.incomeProgress < 50 && monthProgress > 50 && (
                 <p>• Consider additional income sources to meet your goal</p>
@@ -281,7 +330,10 @@ const BudgetOverview = ({
               {calculations.monthlySavings < 0 && (
                 <p>• Focus on reducing expenses to improve your savings rate</p>
               )}
-              <p>• Your top expense category is {categoryBudgetAnalysis[0]?.category}</p>
+              <p>
+                • Your top expense category is{" "}
+                {categoryBudgetAnalysis[0]?.category}
+              </p>
             </div>
           </div>
         </div>
@@ -334,7 +386,12 @@ const BudgetSetupModal = ({ currentGoals, onSave, onClose }) => {
                 <input
                   type="number"
                   value={goals.monthlyIncome}
-                  onChange={(e) => setGoals(prev => ({ ...prev, monthlyIncome: Number(e.target.value) }))}
+                  onChange={(e) =>
+                    setGoals((prev) => ({
+                      ...prev,
+                      monthlyIncome: Number(e.target.value),
+                    }))
+                  }
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                 />
               </div>
@@ -345,7 +402,12 @@ const BudgetSetupModal = ({ currentGoals, onSave, onClose }) => {
                 <input
                   type="number"
                   value={goals.monthlyExpenses}
-                  onChange={(e) => setGoals(prev => ({ ...prev, monthlyExpenses: Number(e.target.value) }))}
+                  onChange={(e) =>
+                    setGoals((prev) => ({
+                      ...prev,
+                      monthlyExpenses: Number(e.target.value),
+                    }))
+                  }
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                 />
               </div>
@@ -356,7 +418,12 @@ const BudgetSetupModal = ({ currentGoals, onSave, onClose }) => {
                 <input
                   type="number"
                   value={goals.savingsTarget}
-                  onChange={(e) => setGoals(prev => ({ ...prev, savingsTarget: Number(e.target.value) }))}
+                  onChange={(e) =>
+                    setGoals((prev) => ({
+                      ...prev,
+                      savingsTarget: Number(e.target.value),
+                    }))
+                  }
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                 />
               </div>
@@ -365,7 +432,9 @@ const BudgetSetupModal = ({ currentGoals, onSave, onClose }) => {
 
           {/* Category Budgets */}
           <div>
-            <h4 className="font-semibold text-gray-900 mb-4">Category Budgets</h4>
+            <h4 className="font-semibold text-gray-900 mb-4">
+              Category Budgets
+            </h4>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {Object.entries(goals.categories).map(([category, amount]) => (
                 <div key={category}>
@@ -375,13 +444,15 @@ const BudgetSetupModal = ({ currentGoals, onSave, onClose }) => {
                   <input
                     type="number"
                     value={amount}
-                    onChange={(e) => setGoals(prev => ({
-                      ...prev,
-                      categories: {
-                        ...prev.categories,
-                        [category]: Number(e.target.value)
-                      }
-                    }))}
+                    onChange={(e) =>
+                      setGoals((prev) => ({
+                        ...prev,
+                        categories: {
+                          ...prev.categories,
+                          [category]: Number(e.target.value),
+                        },
+                      }))
+                    }
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                   />
                 </div>

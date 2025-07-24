@@ -1,42 +1,42 @@
-import React, { useState } from 'react';
-import { 
-  Edit3, 
-  Trash2, 
-  Copy, 
-  MoreVertical, 
-  Clock, 
-  Tag, 
+import React, { useState } from "react";
+import {
+  Edit3,
+  Trash2,
+  Copy,
+  MoreVertical,
+  Clock,
+  Tag,
   DollarSign,
   Calendar,
   User,
-  FileText
-} from 'lucide-react';
-import { formatCurrency, formatDate } from '../../utils/helpers';
-import { CATEGORIES } from '../../utils/constants';
+  FileText,
+} from "lucide-react";
+import { formatCurrency, formatDate } from "../../utils/helpers";
+import { CATEGORIES } from "../../utils/constants";
 
-const TransactionItem = ({ 
-  transaction, 
-  type, 
-  onEdit, 
-  onDelete, 
+const TransactionItem = ({
+  transaction,
+  type,
+  onEdit,
+  onDelete,
   onDuplicate,
   isSelected = false,
   onSelect,
   showDetails = false,
   compact = false,
-  className = ""
+  className = "",
 }) => {
   const [showMenu, setShowMenu] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [editForm, setEditForm] = useState({
-    description: transaction.description || transaction.source || '',
-    category: transaction.category || 'Other',
-    amount: transaction.amount || 0
+    description: transaction.description || transaction.source || "",
+    category: transaction.category || "Other",
+    amount: transaction.amount || 0,
   });
 
   // Get category information
-  const category = CATEGORIES.find(cat => cat.name === transaction.category);
-  const categoryColor = category?.color || '#6b7280';
+  const category = CATEGORIES.find((cat) => cat.name === transaction.category);
+  const categoryColor = category?.color || "#6b7280";
 
   // Handle edit submission
   const handleEditSubmit = (e) => {
@@ -51,13 +51,13 @@ const TransactionItem = ({
   const handleMenuAction = (action) => {
     setShowMenu(false);
     switch (action) {
-      case 'edit':
+      case "edit":
         setIsEditing(true);
         break;
-      case 'duplicate':
+      case "duplicate":
         onDuplicate && onDuplicate(transaction);
         break;
-      case 'delete':
+      case "delete":
         onDelete && onDelete(transaction.id);
         break;
     }
@@ -66,33 +66,45 @@ const TransactionItem = ({
   // Render editing form
   if (isEditing) {
     return (
-      <div className={`p-4 border border-indigo-200 bg-indigo-50 rounded-lg ${className}`}>
+      <div
+        className={`p-4 border border-indigo-200 bg-indigo-50 rounded-lg ${className}`}
+      >
         <form onSubmit={handleEditSubmit} className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                {type === 'income' ? 'Source' : 'Description'}
+                {type === "income" ? "Source" : "Description"}
               </label>
               <input
                 type="text"
                 value={editForm.description}
-                onChange={(e) => setEditForm(prev => ({ ...prev, description: e.target.value }))}
+                onChange={(e) =>
+                  setEditForm((prev) => ({
+                    ...prev,
+                    description: e.target.value,
+                  }))
+                }
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                 required
               />
             </div>
 
-            {type === 'expenses' && (
+            {type === "expenses" && (
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Category
                 </label>
                 <select
                   value={editForm.category}
-                  onChange={(e) => setEditForm(prev => ({ ...prev, category: e.target.value }))}
+                  onChange={(e) =>
+                    setEditForm((prev) => ({
+                      ...prev,
+                      category: e.target.value,
+                    }))
+                  }
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                 >
-                  {CATEGORIES.map(cat => (
+                  {CATEGORIES.map((cat) => (
                     <option key={cat.id} value={cat.name}>
                       {cat.icon} {cat.name}
                     </option>
@@ -108,7 +120,12 @@ const TransactionItem = ({
               <input
                 type="number"
                 value={editForm.amount}
-                onChange={(e) => setEditForm(prev => ({ ...prev, amount: parseFloat(e.target.value) || 0 }))}
+                onChange={(e) =>
+                  setEditForm((prev) => ({
+                    ...prev,
+                    amount: parseFloat(e.target.value) || 0,
+                  }))
+                }
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                 min="0"
                 step="0.01"
@@ -140,11 +157,13 @@ const TransactionItem = ({
   // Render compact view
   if (compact) {
     return (
-      <div className={`flex items-center space-x-3 p-3 rounded-lg border transition-all duration-200 ${
-        isSelected 
-          ? 'border-indigo-200 bg-indigo-50' 
-          : 'border-gray-200 bg-white hover:bg-gray-50'
-      } ${className}`}>
+      <div
+        className={`flex items-center space-x-3 p-3 rounded-lg border transition-all duration-200 ${
+          isSelected
+            ? "border-indigo-200 bg-indigo-50"
+            : "border-gray-200 bg-white hover:bg-gray-50"
+        } ${className}`}
+      >
         {/* Selection checkbox */}
         {onSelect && (
           <input
@@ -156,8 +175,8 @@ const TransactionItem = ({
         )}
 
         {/* Category indicator */}
-        {type === 'expenses' && (
-          <div 
+        {type === "expenses" && (
+          <div
             className="w-3 h-3 rounded-full flex-shrink-0"
             style={{ backgroundColor: categoryColor }}
           />
@@ -166,19 +185,24 @@ const TransactionItem = ({
         {/* Content */}
         <div className="flex-1 min-w-0">
           <p className="font-medium text-gray-900 truncate">
-            {type === 'income' ? transaction.source : transaction.description}
+            {type === "income" ? transaction.source : transaction.description}
           </p>
           <p className="text-xs text-gray-500">
             {transaction.time}
-            {type === 'expenses' && transaction.category && ` • ${transaction.category}`}
+            {type === "expenses" &&
+              transaction.category &&
+              ` • ${transaction.category}`}
           </p>
         </div>
 
         {/* Amount */}
-        <p className={`font-semibold ${
-          type === 'income' ? 'text-green-600' : 'text-red-600'
-        }`}>
-          {type === 'income' ? '+' : '-'}{formatCurrency(transaction.amount)}
+        <p
+          className={`font-semibold ${
+            type === "income" ? "text-green-600" : "text-red-600"
+          }`}
+        >
+          {type === "income" ? "+" : "-"}
+          {formatCurrency(transaction.amount)}
         </p>
 
         {/* Actions menu */}
@@ -189,11 +213,11 @@ const TransactionItem = ({
           >
             <MoreVertical className="h-4 w-4" />
           </button>
-          
+
           {showMenu && (
             <>
-              <div 
-                className="fixed inset-0 z-10" 
+              <div
+                className="fixed inset-0 z-10"
                 onClick={() => setShowMenu(false)}
               />
               <ActionMenu onAction={handleMenuAction} />
@@ -206,9 +230,11 @@ const TransactionItem = ({
 
   // Render detailed view
   return (
-    <div className={`group relative bg-white border border-gray-200 rounded-xl shadow-sm hover:shadow-md transition-all duration-200 ${
-      isSelected ? 'ring-2 ring-indigo-500 border-indigo-300' : ''
-    } ${className}`}>
+    <div
+      className={`group relative bg-white border border-gray-200 rounded-xl shadow-sm hover:shadow-md transition-all duration-200 ${
+        isSelected ? "ring-2 ring-indigo-500 border-indigo-300" : ""
+      } ${className}`}
+    >
       {/* Header */}
       <div className="p-4 border-b border-gray-100">
         <div className="flex items-center justify-between">
@@ -224,18 +250,24 @@ const TransactionItem = ({
             )}
 
             {/* Transaction type indicator */}
-            <div className={`p-2 rounded-lg ${
-              type === 'income' ? 'bg-green-100' : 'bg-red-100'
-            }`}>
-              <DollarSign className={`h-4 w-4 ${
-                type === 'income' ? 'text-green-600' : 'text-red-600'
-              }`} />
+            <div
+              className={`p-2 rounded-lg ${
+                type === "income" ? "bg-green-100" : "bg-red-100"
+              }`}
+            >
+              <DollarSign
+                className={`h-4 w-4 ${
+                  type === "income" ? "text-green-600" : "text-red-600"
+                }`}
+              />
             </div>
 
             {/* Main info */}
             <div>
               <h4 className="font-semibold text-gray-900">
-                {type === 'income' ? transaction.source : transaction.description}
+                {type === "income"
+                  ? transaction.source
+                  : transaction.description}
               </h4>
               <div className="flex items-center space-x-2 text-sm text-gray-500">
                 <Clock className="h-3 w-3" />
@@ -244,7 +276,7 @@ const TransactionItem = ({
                   <>
                     <span>•</span>
                     <Calendar className="h-3 w-3" />
-                    <span>{formatDate(transaction.createdAt, 'MMM dd')}</span>
+                    <span>{formatDate(transaction.createdAt, "MMM dd")}</span>
                   </>
                 )}
               </div>
@@ -254,12 +286,15 @@ const TransactionItem = ({
           {/* Amount and actions */}
           <div className="flex items-center space-x-3">
             <div className="text-right">
-              <p className={`text-xl font-bold ${
-                type === 'income' ? 'text-green-600' : 'text-red-600'
-              }`}>
-                {type === 'income' ? '+' : '-'}{formatCurrency(transaction.amount)}
+              <p
+                className={`text-xl font-bold ${
+                  type === "income" ? "text-green-600" : "text-red-600"
+                }`}
+              >
+                {type === "income" ? "+" : "-"}
+                {formatCurrency(transaction.amount)}
               </p>
-              {type === 'expenses' && transaction.category && (
+              {type === "expenses" && transaction.category && (
                 <p className="text-sm text-gray-500">{transaction.category}</p>
               )}
             </div>
@@ -272,11 +307,11 @@ const TransactionItem = ({
               >
                 <MoreVertical className="h-4 w-4" />
               </button>
-              
+
               {showMenu && (
                 <>
-                  <div 
-                    className="fixed inset-0 z-10" 
+                  <div
+                    className="fixed inset-0 z-10"
                     onClick={() => setShowMenu(false)}
                   />
                   <ActionMenu onAction={handleMenuAction} />
@@ -288,11 +323,11 @@ const TransactionItem = ({
       </div>
 
       {/* Category badge for expenses */}
-      {type === 'expenses' && transaction.category && (
+      {type === "expenses" && transaction.category && (
         <div className="px-4 py-2 border-b border-gray-100">
           <div className="flex items-center space-x-2">
             <Tag className="h-4 w-4 text-gray-400" />
-            <span 
+            <span
               className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium text-white"
               style={{ backgroundColor: categoryColor }}
             >
@@ -312,7 +347,12 @@ const TransactionItem = ({
             </div>
             <div>
               <span className="font-medium">Created:</span>
-              <p>{formatDate(transaction.createdAt || Date.now(), 'dd MMM yyyy, HH:mm')}</p>
+              <p>
+                {formatDate(
+                  transaction.createdAt || Date.now(),
+                  "dd MMM yyyy, HH:mm",
+                )}
+              </p>
             </div>
           </div>
         </div>
@@ -358,14 +398,14 @@ const TransactionItem = ({
 const ActionMenu = ({ onAction }) => (
   <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-20">
     <button
-      onClick={() => onAction('edit')}
+      onClick={() => onAction("edit")}
       className="w-full flex items-center space-x-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
     >
       <Edit3 className="h-4 w-4" />
       <span>Edit Transaction</span>
     </button>
     <button
-      onClick={() => onAction('duplicate')}
+      onClick={() => onAction("duplicate")}
       className="w-full flex items-center space-x-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
     >
       <Copy className="h-4 w-4" />
@@ -373,7 +413,7 @@ const ActionMenu = ({ onAction }) => (
     </button>
     <div className="border-t border-gray-100 my-1" />
     <button
-      onClick={() => onAction('delete')}
+      onClick={() => onAction("delete")}
       className="w-full flex items-center space-x-2 px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors"
     >
       <Trash2 className="h-4 w-4" />
@@ -384,7 +424,9 @@ const ActionMenu = ({ onAction }) => (
 
 // Skeleton loader for transaction items
 export const TransactionItemSkeleton = ({ compact = false }) => (
-  <div className={`animate-pulse ${compact ? 'p-3' : 'p-4'} border border-gray-200 rounded-lg`}>
+  <div
+    className={`animate-pulse ${compact ? "p-3" : "p-4"} border border-gray-200 rounded-lg`}
+  >
     <div className="flex items-center space-x-3">
       <div className="w-4 h-4 bg-gray-200 rounded" />
       {!compact && <div className="w-8 h-8 bg-gray-200 rounded-lg" />}

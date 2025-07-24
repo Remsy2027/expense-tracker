@@ -1,22 +1,22 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { 
-  Plus, 
-  DollarSign, 
-  Calendar, 
-  Tag, 
-  FileText, 
-  User, 
-  Save, 
+import React, { useState, useRef, useEffect } from "react";
+import {
+  Plus,
+  DollarSign,
+  Calendar,
+  Tag,
+  FileText,
+  User,
+  Save,
   X,
   Clock,
   Calculator,
-  Repeat
-} from 'lucide-react';
-import { CATEGORIES, INCOME_SOURCES } from '../../utils/constants';
-import { validateTransaction, formatCurrency } from '../../utils/helpers';
+  Repeat,
+} from "lucide-react";
+import { CATEGORIES, INCOME_SOURCES } from "../../utils/constants";
+import { validateTransaction, formatCurrency } from "../../utils/helpers";
 
-const AddTransactionForm = ({ 
-  type = 'expense',
+const AddTransactionForm = ({
+  type = "expense",
   onSubmit,
   onCancel,
   initialData = null,
@@ -24,23 +24,23 @@ const AddTransactionForm = ({
   autoFocus = false,
   showDatePicker = false,
   templates = [],
-  className = ""
+  className = "",
 }) => {
   // Form state
   const [formData, setFormData] = useState({
-    description: initialData?.description || initialData?.source || '',
-    category: initialData?.category || (type === 'expense' ? 'Food' : ''),
-    amount: initialData?.amount || '',
-    source: initialData?.source || '',
-    date: initialData?.date || new Date().toISOString().split('T')[0],
-    notes: initialData?.notes || ''
+    description: initialData?.description || initialData?.source || "",
+    category: initialData?.category || (type === "expense" ? "Food" : ""),
+    amount: initialData?.amount || "",
+    source: initialData?.source || "",
+    date: initialData?.date || new Date().toISOString().split("T")[0],
+    notes: initialData?.notes || "",
   });
 
   // UI state
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errors, setErrors] = useState({});
   const [showCalculator, setShowCalculator] = useState(false);
-  const [calculatorValue, setCalculatorValue] = useState('');
+  const [calculatorValue, setCalculatorValue] = useState("");
   const [showTemplates, setShowTemplates] = useState(false);
 
   // Refs
@@ -57,7 +57,7 @@ const AddTransactionForm = ({
   // Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     // Clear previous errors
     setErrors({});
 
@@ -65,12 +65,11 @@ const AddTransactionForm = ({
     const validation = validateTransaction(formData, type);
     if (!validation.isValid) {
       const fieldErrors = {};
-      validation.errors.forEach(error => {
-        if (error.includes('Amount')) fieldErrors.amount = error;
-        else if (error.includes('description') || error.includes('source')) {
-          fieldErrors[type === 'expense' ? 'description' : 'source'] = error;
-        }
-        else fieldErrors.general = error;
+      validation.errors.forEach((error) => {
+        if (error.includes("Amount")) fieldErrors.amount = error;
+        else if (error.includes("description") || error.includes("source")) {
+          fieldErrors[type === "expense" ? "description" : "source"] = error;
+        } else fieldErrors.general = error;
       });
       setErrors(fieldErrors);
       return;
@@ -81,24 +80,24 @@ const AddTransactionForm = ({
     try {
       const transactionData = {
         ...formData,
-        amount: parseFloat(formData.amount)
+        amount: parseFloat(formData.amount),
       };
 
       const result = await onSubmit(transactionData);
-      
+
       if (result && result.success) {
         // Reset form on success
         setFormData({
-          description: '',
-          category: type === 'expense' ? 'Food' : '',
-          amount: '',
-          source: '',
-          date: new Date().toISOString().split('T')[0],
-          notes: ''
+          description: "",
+          category: type === "expense" ? "Food" : "",
+          amount: "",
+          source: "",
+          date: new Date().toISOString().split("T")[0],
+          notes: "",
         });
       }
     } catch (error) {
-      setErrors({ general: 'Failed to save transaction. Please try again.' });
+      setErrors({ general: "Failed to save transaction. Please try again." });
     } finally {
       setIsSubmitting(false);
     }
@@ -106,27 +105,27 @@ const AddTransactionForm = ({
 
   // Handle input changes
   const handleInputChange = (field, value) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
-    
+    setFormData((prev) => ({ ...prev, [field]: value }));
+
     // Clear field-specific errors
     if (errors[field]) {
-      setErrors(prev => ({ ...prev, [field]: undefined }));
+      setErrors((prev) => ({ ...prev, [field]: undefined }));
     }
   };
 
   // Handle calculator
   const handleCalculatorResult = (value) => {
-    setFormData(prev => ({ ...prev, amount: value.toString() }));
-    setCalculatorValue('');
+    setFormData((prev) => ({ ...prev, amount: value.toString() }));
+    setCalculatorValue("");
     setShowCalculator(false);
   };
 
   // Handle template selection
   const handleTemplateSelect = (template) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
       ...template,
-      date: prev.date // Keep current date
+      date: prev.date, // Keep current date
     }));
     setShowTemplates(false);
   };
@@ -137,13 +136,17 @@ const AddTransactionForm = ({
   if (!isVisible) return null;
 
   return (
-    <div className={`bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden ${className}`}>
+    <div
+      className={`bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden ${className}`}
+    >
       {/* Header */}
-      <div className={`px-6 py-4 ${
-        type === 'income' 
-          ? 'bg-gradient-to-r from-green-500 to-green-600' 
-          : 'bg-gradient-to-r from-red-500 to-red-600'
-      }`}>
+      <div
+        className={`px-6 py-4 ${
+          type === "income"
+            ? "bg-gradient-to-r from-green-500 to-green-600"
+            : "bg-gradient-to-r from-red-500 to-red-600"
+        }`}
+      >
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-3">
             <div className="p-2 bg-white/20 rounded-lg">
@@ -151,14 +154,16 @@ const AddTransactionForm = ({
             </div>
             <div>
               <h3 className="text-lg font-semibold text-white">
-                Add {type === 'income' ? 'Income' : 'Expense'}
+                Add {type === "income" ? "Income" : "Expense"}
               </h3>
               <p className="text-white/80 text-sm">
-                {type === 'income' ? 'Record your earnings' : 'Track your spending'}
+                {type === "income"
+                  ? "Record your earnings"
+                  : "Track your spending"}
               </p>
             </div>
           </div>
-          
+
           {onCancel && (
             <button
               onClick={onCancel}
@@ -176,16 +181,18 @@ const AddTransactionForm = ({
         {templates.length > 0 && (
           <div className="space-y-3">
             <div className="flex items-center justify-between">
-              <h4 className="text-sm font-medium text-gray-700">Quick Templates</h4>
+              <h4 className="text-sm font-medium text-gray-700">
+                Quick Templates
+              </h4>
               <button
                 type="button"
                 onClick={() => setShowTemplates(!showTemplates)}
                 className="text-sm text-indigo-600 hover:text-indigo-700"
               >
-                {showTemplates ? 'Hide' : 'Show'} Templates
+                {showTemplates ? "Hide" : "Show"} Templates
               </button>
             </div>
-            
+
             {showTemplates && (
               <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
                 {templates.map((template, index) => (
@@ -196,11 +203,15 @@ const AddTransactionForm = ({
                     className="p-3 text-left border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
                   >
                     <p className="font-medium text-sm text-gray-900">
-                      {type === 'income' ? template.source : template.description}
+                      {type === "income"
+                        ? template.source
+                        : template.description}
                     </p>
                     <p className="text-xs text-gray-500">
                       {formatCurrency(template.amount)}
-                      {type === 'expense' && template.category && ` • ${template.category}`}
+                      {type === "expense" &&
+                        template.category &&
+                        ` • ${template.category}`}
                     </p>
                   </button>
                 ))}
@@ -214,25 +225,31 @@ const AddTransactionForm = ({
           {/* Description/Source */}
           <div className="md:col-span-2">
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              {type === 'income' ? (
-                <><User className="inline h-4 w-4 mr-1" />Income Source</>
+              {type === "income" ? (
+                <>
+                  <User className="inline h-4 w-4 mr-1" />
+                  Income Source
+                </>
               ) : (
-                <><FileText className="inline h-4 w-4 mr-1" />Description</>
+                <>
+                  <FileText className="inline h-4 w-4 mr-1" />
+                  Description
+                </>
               )}
             </label>
-            
-            {type === 'income' ? (
+
+            {type === "income" ? (
               <select
                 ref={firstInputRef}
                 value={formData.source}
-                onChange={(e) => handleInputChange('source', e.target.value)}
+                onChange={(e) => handleInputChange("source", e.target.value)}
                 className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition-colors ${
-                  errors.source ? 'border-red-300' : 'border-gray-300'
+                  errors.source ? "border-red-300" : "border-gray-300"
                 }`}
                 required
               >
                 <option value="">Select income source</option>
-                {INCOME_SOURCES.map(source => (
+                {INCOME_SOURCES.map((source) => (
                   <option key={source.id} value={source.name}>
                     {source.icon} {source.name}
                   </option>
@@ -243,15 +260,17 @@ const AddTransactionForm = ({
                 ref={firstInputRef}
                 type="text"
                 value={formData.description}
-                onChange={(e) => handleInputChange('description', e.target.value)}
+                onChange={(e) =>
+                  handleInputChange("description", e.target.value)
+                }
                 className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent transition-colors ${
-                  errors.description ? 'border-red-300' : 'border-gray-300'
+                  errors.description ? "border-red-300" : "border-gray-300"
                 }`}
                 placeholder="e.g., Lunch, Grocery, Gas bill"
                 required
               />
             )}
-            
+
             {(errors.source || errors.description) && (
               <p className="mt-1 text-sm text-red-600">
                 {errors.source || errors.description}
@@ -260,7 +279,7 @@ const AddTransactionForm = ({
           </div>
 
           {/* Category (for expenses only) */}
-          {type === 'expense' && (
+          {type === "expense" && (
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 <Tag className="inline h-4 w-4 mr-1" />
@@ -268,11 +287,11 @@ const AddTransactionForm = ({
               </label>
               <select
                 value={formData.category}
-                onChange={(e) => handleInputChange('category', e.target.value)}
+                onChange={(e) => handleInputChange("category", e.target.value)}
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
                 required
               >
-                {CATEGORIES.map(category => (
+                {CATEGORIES.map((category) => (
                   <option key={category.id} value={category.name}>
                     {category.icon} {category.name}
                   </option>
@@ -282,21 +301,21 @@ const AddTransactionForm = ({
           )}
 
           {/* Amount */}
-          <div className={type === 'expense' ? '' : 'md:col-span-2'}>
+          <div className={type === "expense" ? "" : "md:col-span-2"}>
             <label className="block text-sm font-medium text-gray-700 mb-2">
               <DollarSign className="inline h-4 w-4 mr-1" />
               Amount (₹)
             </label>
-            
+
             <div className="space-y-3">
               {/* Amount input */}
               <div className="relative">
                 <input
                   type="number"
                   value={formData.amount}
-                  onChange={(e) => handleInputChange('amount', e.target.value)}
-                  className={`w-full px-4 py-3 pr-12 border rounded-lg focus:ring-2 focus:ring-${type === 'income' ? 'green' : 'red'}-500 focus:border-transparent transition-colors ${
-                    errors.amount ? 'border-red-300' : 'border-gray-300'
+                  onChange={(e) => handleInputChange("amount", e.target.value)}
+                  className={`w-full px-4 py-3 pr-12 border rounded-lg focus:ring-2 focus:ring-${type === "income" ? "green" : "red"}-500 focus:border-transparent transition-colors ${
+                    errors.amount ? "border-red-300" : "border-gray-300"
                   }`}
                   placeholder="0.00"
                   min="0"
@@ -315,15 +334,17 @@ const AddTransactionForm = ({
 
               {/* Quick amount buttons */}
               <div className="grid grid-cols-3 gap-2">
-                {quickAmounts.map(amount => (
+                {quickAmounts.map((amount) => (
                   <button
                     key={amount}
                     type="button"
-                    onClick={() => handleInputChange('amount', amount.toString())}
+                    onClick={() =>
+                      handleInputChange("amount", amount.toString())
+                    }
                     className={`px-3 py-2 text-sm font-medium rounded-lg transition-colors ${
-                      type === 'income'
-                        ? 'bg-green-50 text-green-700 hover:bg-green-100'
-                        : 'bg-red-50 text-red-700 hover:bg-red-100'
+                      type === "income"
+                        ? "bg-green-50 text-green-700 hover:bg-green-100"
+                        : "bg-red-50 text-red-700 hover:bg-red-100"
                     }`}
                   >
                     ₹{amount}
@@ -331,7 +352,7 @@ const AddTransactionForm = ({
                 ))}
               </div>
             </div>
-            
+
             {errors.amount && (
               <p className="mt-1 text-sm text-red-600">{errors.amount}</p>
             )}
@@ -347,8 +368,8 @@ const AddTransactionForm = ({
               <input
                 type="date"
                 value={formData.date}
-                onChange={(e) => handleInputChange('date', e.target.value)}
-                max={new Date().toISOString().split('T')[0]}
+                onChange={(e) => handleInputChange("date", e.target.value)}
+                max={new Date().toISOString().split("T")[0]}
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
               />
             </div>
@@ -361,7 +382,7 @@ const AddTransactionForm = ({
             </label>
             <textarea
               value={formData.notes}
-              onChange={(e) => handleInputChange('notes', e.target.value)}
+              onChange={(e) => handleInputChange("notes", e.target.value)}
               rows={3}
               className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent resize-none"
               placeholder="Add any additional notes..."
@@ -380,9 +401,15 @@ const AddTransactionForm = ({
         <div className="flex items-center justify-between pt-6 border-t border-gray-200">
           <div className="flex items-center space-x-2 text-sm text-gray-500">
             <Clock className="h-4 w-4" />
-            <span>Current time: {new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })}</span>
+            <span>
+              Current time:{" "}
+              {new Date().toLocaleTimeString("en-IN", {
+                hour: "2-digit",
+                minute: "2-digit",
+              })}
+            </span>
           </div>
-          
+
           <div className="flex items-center space-x-3">
             {onCancel && (
               <button
@@ -394,14 +421,18 @@ const AddTransactionForm = ({
                 Cancel
               </button>
             )}
-            
+
             <button
               type="submit"
-              disabled={isSubmitting || !formData.amount || (!formData.description && !formData.source)}
+              disabled={
+                isSubmitting ||
+                !formData.amount ||
+                (!formData.description && !formData.source)
+              }
               className={`px-6 py-2 rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2 ${
-                type === 'income'
-                  ? 'bg-green-600 text-white hover:bg-green-700'
-                  : 'bg-red-600 text-white hover:bg-red-700'
+                type === "income"
+                  ? "bg-green-600 text-white hover:bg-green-700"
+                  : "bg-red-600 text-white hover:bg-red-700"
               }`}
             >
               {isSubmitting ? (
@@ -412,7 +443,7 @@ const AddTransactionForm = ({
               ) : (
                 <>
                   <Save className="h-4 w-4" />
-                  <span>Add {type === 'income' ? 'Income' : 'Expense'}</span>
+                  <span>Add {type === "income" ? "Income" : "Expense"}</span>
                 </>
               )}
             </button>
@@ -433,7 +464,7 @@ const AddTransactionForm = ({
                 <X className="h-5 w-5" />
               </button>
             </div>
-            
+
             <div className="space-y-4">
               <input
                 type="text"
@@ -442,7 +473,7 @@ const AddTransactionForm = ({
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg text-right font-mono"
                 placeholder="Enter calculation"
               />
-              
+
               <div className="flex space-x-2">
                 <button
                   onClick={() => {
@@ -450,7 +481,7 @@ const AddTransactionForm = ({
                       const result = eval(calculatorValue);
                       handleCalculatorResult(result);
                     } catch {
-                      alert('Invalid calculation');
+                      alert("Invalid calculation");
                     }
                   }}
                   className="flex-1 bg-indigo-600 text-white py-2 rounded-lg hover:bg-indigo-700 transition-colors"
@@ -458,7 +489,7 @@ const AddTransactionForm = ({
                   Calculate
                 </button>
                 <button
-                  onClick={() => setCalculatorValue('')}
+                  onClick={() => setCalculatorValue("")}
                   className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
                 >
                   Clear

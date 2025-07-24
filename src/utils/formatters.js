@@ -1,23 +1,26 @@
 // Formatting utilities for ExpenseFlow
 
-import { CURRENCIES } from './constants';
+import { CURRENCIES } from "./constants";
 
 /**
  * Format currency values with proper locale and currency symbol
  */
-export const formatCurrency = (amount, currencyCode = 'INR', options = {}) => {
-  const currency = CURRENCIES.find(c => c.code === currencyCode) || CURRENCIES[0];
-  
+export const formatCurrency = (amount, currencyCode = "INR", options = {}) => {
+  const currency =
+    CURRENCIES.find((c) => c.code === currencyCode) || CURRENCIES[0];
+
   const defaultOptions = {
-    style: 'currency',
+    style: "currency",
     currency: currency.code,
     minimumFractionDigits: currency.decimals,
     maximumFractionDigits: currency.decimals,
-    ...options
+    ...options,
   };
 
   try {
-    return new Intl.NumberFormat(currency.locale, defaultOptions).format(amount);
+    return new Intl.NumberFormat(currency.locale, defaultOptions).format(
+      amount,
+    );
   } catch (error) {
     // Fallback formatting
     return `${currency.symbol}${Number(amount).toFixed(currency.decimals)}`;
@@ -31,11 +34,11 @@ export const formatNumber = (number, options = {}) => {
   const defaultOptions = {
     minimumFractionDigits: 0,
     maximumFractionDigits: 2,
-    ...options
+    ...options,
   };
 
   try {
-    return new Intl.NumberFormat('en-IN', defaultOptions).format(number);
+    return new Intl.NumberFormat("en-IN", defaultOptions).format(number);
   } catch (error) {
     return Number(number).toFixed(defaultOptions.maximumFractionDigits);
   }
@@ -53,8 +56,8 @@ export const formatPercentage = (value, decimals = 1) => {
  */
 export const formatCompactNumber = (number) => {
   const abs = Math.abs(number);
-  const sign = number < 0 ? '-' : '';
-  
+  const sign = number < 0 ? "-" : "";
+
   if (abs >= 1e9) {
     return `${sign}${(abs / 1e9).toFixed(1)}B`;
   } else if (abs >= 1e6) {
@@ -62,47 +65,51 @@ export const formatCompactNumber = (number) => {
   } else if (abs >= 1e3) {
     return `${sign}${(abs / 1e3).toFixed(1)}K`;
   }
-  
+
   return `${sign}${abs}`;
 };
 
 /**
  * Format date values with various formats
  */
-export const formatDate = (date, format = 'dd/MM/yyyy', locale = 'en-IN') => {
-  const dateObj = typeof date === 'string' ? new Date(date) : date;
-  
+export const formatDate = (date, format = "dd/MM/yyyy", locale = "en-IN") => {
+  const dateObj = typeof date === "string" ? new Date(date) : date;
+
   if (isNaN(dateObj.getTime())) {
-    return 'Invalid Date';
+    return "Invalid Date";
   }
 
   const formatMap = {
-    'dd': dateObj.getDate().toString().padStart(2, '0'),
-    'MM': (dateObj.getMonth() + 1).toString().padStart(2, '0'),
-    'yyyy': dateObj.getFullYear().toString(),
-    'MMM': dateObj.toLocaleDateString(locale, { month: 'short' }),
-    'MMMM': dateObj.toLocaleDateString(locale, { month: 'long' }),
-    'HH': dateObj.getHours().toString().padStart(2, '0'),
-    'mm': dateObj.getMinutes().toString().padStart(2, '0'),
-    'ss': dateObj.getSeconds().toString().padStart(2, '0')
+    dd: dateObj.getDate().toString().padStart(2, "0"),
+    MM: (dateObj.getMonth() + 1).toString().padStart(2, "0"),
+    yyyy: dateObj.getFullYear().toString(),
+    MMM: dateObj.toLocaleDateString(locale, { month: "short" }),
+    MMMM: dateObj.toLocaleDateString(locale, { month: "long" }),
+    HH: dateObj.getHours().toString().padStart(2, "0"),
+    mm: dateObj.getMinutes().toString().padStart(2, "0"),
+    ss: dateObj.getSeconds().toString().padStart(2, "0"),
   };
 
-  return format.replace(/dd|MM|yyyy|MMM|MMMM|HH|mm|ss/g, match => formatMap[match] || match);
+  return format.replace(
+    /dd|MM|yyyy|MMM|MMMM|HH|mm|ss/g,
+    (match) => formatMap[match] || match,
+  );
 };
 
 /**
  * Format time values
  */
-export const formatTime = (date, format = '12h', locale = 'en-IN') => {
-  const dateObj = typeof date === 'string' ? new Date(date) : date;
-  
+export const formatTime = (date, format = "12h", locale = "en-IN") => {
+  const dateObj = typeof date === "string" ? new Date(date) : date;
+
   if (isNaN(dateObj.getTime())) {
-    return 'Invalid Time';
+    return "Invalid Time";
   }
 
-  const options = format === '24h' 
-    ? { hour: '2-digit', minute: '2-digit', hour12: false }
-    : { hour: '2-digit', minute: '2-digit', hour12: true };
+  const options =
+    format === "24h"
+      ? { hour: "2-digit", minute: "2-digit", hour12: false }
+      : { hour: "2-digit", minute: "2-digit", hour12: true };
 
   return dateObj.toLocaleTimeString(locale, options);
 };
@@ -110,25 +117,25 @@ export const formatTime = (date, format = '12h', locale = 'en-IN') => {
 /**
  * Format relative time (e.g., "2 hours ago")
  */
-export const formatRelativeTime = (date, locale = 'en-IN') => {
-  const dateObj = typeof date === 'string' ? new Date(date) : date;
+export const formatRelativeTime = (date, locale = "en-IN") => {
+  const dateObj = typeof date === "string" ? new Date(date) : date;
   const now = new Date();
   const diffInSeconds = Math.floor((now - dateObj) / 1000);
 
-  const rtf = new Intl.RelativeTimeFormat(locale, { numeric: 'auto' });
+  const rtf = new Intl.RelativeTimeFormat(locale, { numeric: "auto" });
 
   if (diffInSeconds < 60) {
-    return rtf.format(-diffInSeconds, 'second');
+    return rtf.format(-diffInSeconds, "second");
   } else if (diffInSeconds < 3600) {
-    return rtf.format(-Math.floor(diffInSeconds / 60), 'minute');
+    return rtf.format(-Math.floor(diffInSeconds / 60), "minute");
   } else if (diffInSeconds < 86400) {
-    return rtf.format(-Math.floor(diffInSeconds / 3600), 'hour');
+    return rtf.format(-Math.floor(diffInSeconds / 3600), "hour");
   } else if (diffInSeconds < 2592000) {
-    return rtf.format(-Math.floor(diffInSeconds / 86400), 'day');
+    return rtf.format(-Math.floor(diffInSeconds / 86400), "day");
   } else if (diffInSeconds < 31536000) {
-    return rtf.format(-Math.floor(diffInSeconds / 2592000), 'month');
+    return rtf.format(-Math.floor(diffInSeconds / 2592000), "month");
   } else {
-    return rtf.format(-Math.floor(diffInSeconds / 31536000), 'year');
+    return rtf.format(-Math.floor(diffInSeconds / 31536000), "year");
   }
 };
 
@@ -136,13 +143,13 @@ export const formatRelativeTime = (date, locale = 'en-IN') => {
  * Format file sizes
  */
 export const formatFileSize = (bytes) => {
-  if (bytes === 0) return '0 Bytes';
-  
+  if (bytes === 0) return "0 Bytes";
+
   const k = 1024;
-  const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
+  const sizes = ["Bytes", "KB", "MB", "GB", "TB"];
   const i = Math.floor(Math.log(bytes) / Math.log(k));
-  
-  return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
 };
 
 /**
@@ -168,40 +175,40 @@ export const formatDuration = (milliseconds) => {
 /**
  * Format phone numbers
  */
-export const formatPhoneNumber = (phoneNumber, format = 'indian') => {
-  const cleaned = phoneNumber.replace(/\D/g, '');
-  
-  if (format === 'indian') {
+export const formatPhoneNumber = (phoneNumber, format = "indian") => {
+  const cleaned = phoneNumber.replace(/\D/g, "");
+
+  if (format === "indian") {
     // Indian phone number format: +91 XXXXX XXXXX
     if (cleaned.length === 10) {
       return `+91 ${cleaned.slice(0, 5)} ${cleaned.slice(5)}`;
-    } else if (cleaned.length === 12 && cleaned.startsWith('91')) {
+    } else if (cleaned.length === 12 && cleaned.startsWith("91")) {
       return `+91 ${cleaned.slice(2, 7)} ${cleaned.slice(7)}`;
     }
   }
-  
+
   return phoneNumber; // Return original if no format matches
 };
 
 /**
  * Format transaction references/IDs
  */
-export const formatTransactionId = (id, prefix = 'TXN') => {
-  return `${prefix}${String(id).padStart(8, '0')}`;
+export const formatTransactionId = (id, prefix = "TXN") => {
+  return `${prefix}${String(id).padStart(8, "0")}`;
 };
 
 /**
  * Format account numbers (mask sensitive info)
  */
 export const formatAccountNumber = (accountNumber, showLast = 4) => {
-  if (!accountNumber) return '';
-  
+  if (!accountNumber) return "";
+
   const str = String(accountNumber);
   if (str.length <= showLast) return str;
-  
-  const masked = '*'.repeat(str.length - showLast);
+
+  const masked = "*".repeat(str.length - showLast);
   const visible = str.slice(-showLast);
-  
+
   return `${masked}${visible}`;
 };
 
@@ -211,15 +218,15 @@ export const formatAccountNumber = (accountNumber, showLast = 4) => {
 export const formatProperCase = (text) => {
   return text
     .toLowerCase()
-    .split(' ')
-    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-    .join(' ');
+    .split(" ")
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(" ");
 };
 
 /**
  * Format text for display (truncate with ellipsis)
  */
-export const formatTruncateText = (text, maxLength = 50, suffix = '...') => {
+export const formatTruncateText = (text, maxLength = 50, suffix = "...") => {
   if (!text || text.length <= maxLength) return text;
   return text.substring(0, maxLength - suffix.length) + suffix;
 };
@@ -227,25 +234,25 @@ export const formatTruncateText = (text, maxLength = 50, suffix = '...') => {
 /**
  * Format arrays as readable lists
  */
-export const formatList = (items, conjunction = 'and', locale = 'en-IN') => {
-  if (!items || items.length === 0) return '';
+export const formatList = (items, conjunction = "and", locale = "en-IN") => {
+  if (!items || items.length === 0) return "";
   if (items.length === 1) return items[0];
   if (items.length === 2) return `${items[0]} ${conjunction} ${items[1]}`;
-  
+
   const last = items[items.length - 1];
   const rest = items.slice(0, -1);
-  
-  return `${rest.join(', ')}, ${conjunction} ${last}`;
+
+  return `${rest.join(", ")}, ${conjunction} ${last}`;
 };
 
 /**
  * Format error messages for display
  */
 export const formatErrorMessage = (error) => {
-  if (typeof error === 'string') return error;
+  if (typeof error === "string") return error;
   if (error?.message) return error.message;
   if (error?.error) return error.error;
-  return 'An unexpected error occurred';
+  return "An unexpected error occurred";
 };
 
 /**
@@ -253,8 +260,8 @@ export const formatErrorMessage = (error) => {
  */
 export const formatFieldName = (fieldName) => {
   return fieldName
-    .replace(/([A-Z])/g, ' $1') // Add space before capital letters
-    .replace(/^./, str => str.toUpperCase()) // Capitalize first letter
+    .replace(/([A-Z])/g, " $1") // Add space before capital letters
+    .replace(/^./, (str) => str.toUpperCase()) // Capitalize first letter
     .trim();
 };
 
@@ -263,21 +270,21 @@ export const formatFieldName = (fieldName) => {
  */
 export const formatValidationMessage = (field, rule, value) => {
   const fieldName = formatFieldName(field);
-  
+
   switch (rule) {
-    case 'required':
+    case "required":
       return `${fieldName} is required`;
-    case 'min':
+    case "min":
       return `${fieldName} must be at least ${value}`;
-    case 'max':
+    case "max":
       return `${fieldName} must not exceed ${value}`;
-    case 'minLength':
+    case "minLength":
       return `${fieldName} must be at least ${value} characters`;
-    case 'maxLength':
+    case "maxLength":
       return `${fieldName} must not exceed ${value} characters`;
-    case 'email':
+    case "email":
       return `${fieldName} must be a valid email address`;
-    case 'pattern':
+    case "pattern":
       return `${fieldName} format is invalid`;
     default:
       return `${fieldName} is invalid`;
@@ -300,8 +307,8 @@ export const formatSearchQuery = (query) => {
   return query
     .trim()
     .toLowerCase()
-    .replace(/[^\w\s]/g, '') // Remove special characters
-    .replace(/\s+/g, ' '); // Normalize whitespace
+    .replace(/[^\w\s]/g, "") // Remove special characters
+    .replace(/\s+/g, " "); // Normalize whitespace
 };
 
 /**
@@ -309,8 +316,8 @@ export const formatSearchQuery = (query) => {
  */
 export const formatSortKey = (key) => {
   return key
-    .replace(/([A-Z])/g, ' $1')
-    .replace(/^./, str => str.toUpperCase())
+    .replace(/([A-Z])/g, " $1")
+    .replace(/^./, (str) => str.toUpperCase())
     .trim();
 };
 
@@ -335,5 +342,5 @@ export default {
   formatValidationMessage,
   formatApiResponse,
   formatSearchQuery,
-  formatSortKey
+  formatSortKey,
 };

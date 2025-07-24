@@ -1,63 +1,62 @@
-import React, { useState, useEffect } from 'react';
-import { useExpenseData } from './hooks/useExpenseData';
-import { useNotifications } from './hooks/useNotifications';
+import React, { useState, useEffect } from "react";
+import { ExpenseProvider } from "./context/ExpenseContext";
+import { NotificationProvider } from "./hooks/useNotifications";
+import { useExpenseData } from "./hooks/useExpenseData";
+import { useNotifications } from "./hooks/useNotifications";
 
 // Component imports
-import Header from './components/common/Header';
-import MobileMenu from './components/common/MobileMenu';
-import Notifications from './components/common/Notifications';
-import DateSelector from './components/dashboard/DateSelector';
-import SummaryCards from './components/dashboard/SummaryCards';
-import QuickActions from './components/dashboard/QuickActions';
-import TransactionList from './components/transactions/TransactionList';
-import Charts from './components/analytics/Charts';
-import BudgetOverview from './components/budget/BudgetOverview';
-import LoadingSpinner from './components/common/LoadingSpinner';
+import Header from "./components/common/Header";
+import MobileMenu from "./components/common/MobileMenu";
+import Notifications from "./components/common/Notifications";
+import DateSelector from "./components/dashboard/DateSelector";
+import SummaryCards from "./components/dashboard/SummaryCards";
+import QuickActions from "./components/dashboard/QuickActions";
+import TransactionList from "./components/transactions/TransactionList";
+import Charts from "./components/analytics/Charts";
+import BudgetOverview from "./components/budget/BudgetOverview";
+import LoadingSpinner from "./components/common/LoadingSpinner";
 
 // Navigation configuration
 const NAV_ITEMS = [
-  { 
-    id: 'dashboard', 
-    label: 'Dashboard', 
-    icon: 'Home',
-    description: 'Overview and quick actions'
+  {
+    id: "dashboard",
+    label: "Dashboard",
+    icon: "Home",
+    description: "Overview and quick actions",
   },
-  { 
-    id: 'transactions', 
-    label: 'Transactions', 
-    icon: 'List',
-    description: 'View and manage all transactions'
+  {
+    id: "transactions",
+    label: "Transactions",
+    icon: "List",
+    description: "View and manage all transactions",
   },
-  { 
-    id: 'analytics', 
-    label: 'Analytics', 
-    icon: 'BarChart3',
-    description: 'Charts and financial insights'
+  {
+    id: "analytics",
+    label: "Analytics",
+    icon: "BarChart3",
+    description: "Charts and financial insights",
   },
-  { 
-    id: 'budget', 
-    label: 'Budget', 
-    icon: 'Wallet',
-    description: 'Monthly budget tracking'
-  }
+  {
+    id: "budget",
+    label: "Budget",
+    icon: "Wallet",
+    description: "Monthly budget tracking",
+  },
 ];
 
-const App = () => {
+const AppContent = () => {
   // State management
-  const [activeTab, setActiveTab] = useState('dashboard');
+  const [activeTab, setActiveTab] = useState("dashboard");
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
-  const [currentDate, setCurrentDate] = useState(new Date().toISOString().split('T')[0]);
-  
+  const [currentDate, setCurrentDate] = useState(
+    new Date().toISOString().split("T")[0],
+  );
+
   // Custom hooks
-  const { 
-    dailyData, 
-    addIncome, 
-    addExpense, 
-    deleteTransaction, 
-    calculations 
-  } = useExpenseData(currentDate);
-  
+  const { dailyData, addIncome, addExpense, deleteTransaction, calculations } =
+    useExpenseData(currentDate);
+
   const { notifications } = useNotifications();
 
   // Handle app initialization
@@ -65,22 +64,22 @@ const App = () => {
     const initializeApp = async () => {
       try {
         // Simulate app initialization (loading saved data, etc.)
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+
         // Check for saved preferences
-        const savedTab = localStorage.getItem('expense-tracker-active-tab');
-        if (savedTab && NAV_ITEMS.find(item => item.id === savedTab)) {
+        const savedTab = localStorage.getItem("expense-tracker-active-tab");
+        if (savedTab && NAV_ITEMS.find((item) => item.id === savedTab)) {
           setActiveTab(savedTab);
         }
-        
-        const savedDate = localStorage.getItem('expense-tracker-current-date');
+
+        const savedDate = localStorage.getItem("expense-tracker-current-date");
         if (savedDate) {
           setCurrentDate(savedDate);
         }
-        
+
         setIsLoading(false);
       } catch (error) {
-        console.error('Failed to initialize app:', error);
+        console.error("Failed to initialize app:", error);
         setIsLoading(false);
       }
     };
@@ -90,11 +89,11 @@ const App = () => {
 
   // Save preferences when they change
   useEffect(() => {
-    localStorage.setItem('expense-tracker-active-tab', activeTab);
+    localStorage.setItem("expense-tracker-active-tab", activeTab);
   }, [activeTab]);
 
   useEffect(() => {
-    localStorage.setItem('expense-tracker-current-date', currentDate);
+    localStorage.setItem("expense-tracker-current-date", currentDate);
   }, [currentDate]);
 
   // Handle tab switching
@@ -117,7 +116,7 @@ const App = () => {
   const setQuickDate = (days) => {
     const date = new Date();
     date.setDate(date.getDate() + days);
-    setCurrentDate(date.toISOString().split('T')[0]);
+    setCurrentDate(date.toISOString().split("T")[0]);
   };
 
   // Keyboard shortcuts
@@ -125,10 +124,10 @@ const App = () => {
     const handleKeyDown = (event) => {
       if (event.ctrlKey || event.metaKey) {
         const keyToTab = {
-          '1': 'dashboard',
-          '2': 'transactions',
-          '3': 'analytics',
-          '4': 'budget'
+          1: "dashboard",
+          2: "transactions",
+          3: "analytics",
+          4: "budget",
         };
 
         const targetTab = keyToTab[event.key];
@@ -139,13 +138,13 @@ const App = () => {
       }
 
       // Escape key to close mobile menu
-      if (event.key === 'Escape' && isMobileMenuOpen) {
+      if (event.key === "Escape" && isMobileMenuOpen) {
         setIsMobileMenuOpen(false);
       }
     };
 
-    document.addEventListener('keydown', handleKeyDown);
-    return () => document.removeEventListener('keydown', handleKeyDown);
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
   }, [isMobileMenuOpen]);
 
   // Render loading screen
@@ -170,52 +169,49 @@ const App = () => {
     const currentData = dailyData[currentDate] || { income: [], expenses: [] };
 
     switch (activeTab) {
-      case 'dashboard':
+      case "dashboard":
         return (
           <div className="space-y-8">
-            <SummaryCards 
+            <SummaryCards
               calculations={calculations}
               currentDate={currentDate}
             />
-            <QuickActions 
-              onAddIncome={addIncome}
-              onAddExpense={addExpense}
-            />
+            <QuickActions onAddIncome={addIncome} onAddExpense={addExpense} />
           </div>
         );
 
-      case 'transactions':
+      case "transactions":
         return (
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <TransactionList
               type="income"
               title="Income Transactions"
               data={currentData.income}
-              onDelete={(id) => deleteTransaction(id, 'income')}
+              onDelete={(id) => deleteTransaction(id, "income")}
               emptyMessage="No income recorded for this date"
             />
             <TransactionList
               type="expenses"
               title="Expense Transactions"
               data={currentData.expenses}
-              onDelete={(id) => deleteTransaction(id, 'expenses')}
+              onDelete={(id) => deleteTransaction(id, "expenses")}
               emptyMessage="No expenses recorded for this date"
             />
           </div>
         );
 
-      case 'analytics':
+      case "analytics":
         return (
-          <Charts 
+          <Charts
             calculations={calculations}
             dailyData={dailyData}
             currentDate={currentDate}
           />
         );
 
-      case 'budget':
+      case "budget":
         return (
-          <BudgetOverview 
+          <BudgetOverview
             calculations={calculations}
             currentDate={currentDate}
           />
@@ -231,7 +227,7 @@ const App = () => {
               The requested page could not be found.
             </p>
             <button
-              onClick={() => setActiveTab('dashboard')}
+              onClick={() => setActiveTab("dashboard")}
               className="btn bg-indigo-600 text-white hover:bg-indigo-700"
             >
               Go to Dashboard
@@ -273,9 +269,7 @@ const App = () => {
         />
 
         {/* Tab Content */}
-        <div className="animate-fade-in">
-          {renderTabContent()}
-        </div>
+        <div className="animate-fade-in">{renderTabContent()}</div>
       </main>
 
       {/* Footer */}
@@ -288,22 +282,34 @@ const App = () => {
                 <div className="w-8 h-8 bg-gradient-to-r from-indigo-600 to-purple-600 rounded-lg flex items-center justify-center">
                   <span className="text-white font-bold text-sm">💰</span>
                 </div>
-                <span className="text-xl font-bold text-gray-900">ExpenseFlow</span>
+                <span className="text-xl font-bold text-gray-900">
+                  ExpenseFlow
+                </span>
               </div>
               <p className="text-gray-600 mb-4 max-w-md">
-                Your personal finance companion for smarter money management. 
-                Track expenses, manage budgets, and visualize your financial data with ease.
+                Your personal finance companion for smarter money management.
+                Track expenses, manage budgets, and visualize your financial
+                data with ease.
               </p>
               <div className="flex space-x-4">
-                <a href="#" className="text-gray-400 hover:text-indigo-600 transition-colors">
+                <a
+                  href="#"
+                  className="text-gray-400 hover:text-indigo-600 transition-colors"
+                >
                   <span className="sr-only">Twitter</span>
                   🐦
                 </a>
-                <a href="#" className="text-gray-400 hover:text-indigo-600 transition-colors">
+                <a
+                  href="#"
+                  className="text-gray-400 hover:text-indigo-600 transition-colors"
+                >
                   <span className="sr-only">GitHub</span>
                   🐙
                 </a>
-                <a href="#" className="text-gray-400 hover:text-indigo-600 transition-colors">
+                <a
+                  href="#"
+                  className="text-gray-400 hover:text-indigo-600 transition-colors"
+                >
                   <span className="sr-only">LinkedIn</span>
                   💼
                 </a>
@@ -331,22 +337,34 @@ const App = () => {
               </h3>
               <ul className="space-y-2 text-sm text-gray-600">
                 <li>
-                  <a href="#" className="hover:text-indigo-600 transition-colors">
+                  <a
+                    href="#"
+                    className="hover:text-indigo-600 transition-colors"
+                  >
                     Help Center
                   </a>
                 </li>
                 <li>
-                  <a href="#" className="hover:text-indigo-600 transition-colors">
+                  <a
+                    href="#"
+                    className="hover:text-indigo-600 transition-colors"
+                  >
                     Privacy Policy
                   </a>
                 </li>
                 <li>
-                  <a href="#" className="hover:text-indigo-600 transition-colors">
+                  <a
+                    href="#"
+                    className="hover:text-indigo-600 transition-colors"
+                  >
                     Terms of Service
                   </a>
                 </li>
                 <li>
-                  <a href="#" className="hover:text-indigo-600 transition-colors">
+                  <a
+                    href="#"
+                    className="hover:text-indigo-600 transition-colors"
+                  >
                     Contact Us
                   </a>
                 </li>
@@ -370,6 +388,17 @@ const App = () => {
         </div>
       </footer>
     </div>
+  );
+};
+
+// Main App Component with Providers
+const App = () => {
+  return (
+    <NotificationProvider>
+      <ExpenseProvider>
+        <AppContent />
+      </ExpenseProvider>
+    </NotificationProvider>
   );
 };
 

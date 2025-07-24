@@ -1,5 +1,12 @@
-import React, { useState, useEffect } from 'react';
-import { X, CheckCircle, AlertCircle, AlertTriangle, Info, Clock } from 'lucide-react';
+import React, { useState, useEffect } from "react";
+import {
+  X,
+  CheckCircle,
+  AlertCircle,
+  AlertTriangle,
+  Info,
+  Clock,
+} from "lucide-react";
 
 const Notifications = ({ notifications = [], onRemove, maxVisible = 5 }) => {
   const [visibleNotifications, setVisibleNotifications] = useState([]);
@@ -10,13 +17,13 @@ const Notifications = ({ notifications = [], onRemove, maxVisible = 5 }) => {
 
   const getNotificationIcon = (type) => {
     switch (type) {
-      case 'success':
+      case "success":
         return CheckCircle;
-      case 'error':
+      case "error":
         return AlertCircle;
-      case 'warning':
+      case "warning":
         return AlertTriangle;
-      case 'info':
+      case "info":
       default:
         return Info;
     }
@@ -24,15 +31,15 @@ const Notifications = ({ notifications = [], onRemove, maxVisible = 5 }) => {
 
   const getNotificationStyles = (type) => {
     const baseStyles = "border-l-4 shadow-lg backdrop-blur-sm";
-    
+
     switch (type) {
-      case 'success':
+      case "success":
         return `${baseStyles} bg-green-50/95 border-l-green-500 text-green-800`;
-      case 'error':
+      case "error":
         return `${baseStyles} bg-red-50/95 border-l-red-500 text-red-800`;
-      case 'warning':
+      case "warning":
         return `${baseStyles} bg-yellow-50/95 border-l-yellow-500 text-yellow-800`;
-      case 'info':
+      case "info":
       default:
         return `${baseStyles} bg-blue-50/95 border-l-blue-500 text-blue-800`;
     }
@@ -40,15 +47,15 @@ const Notifications = ({ notifications = [], onRemove, maxVisible = 5 }) => {
 
   const getIconStyles = (type) => {
     switch (type) {
-      case 'success':
-        return 'text-green-600';
-      case 'error':
-        return 'text-red-600';
-      case 'warning':
-        return 'text-yellow-600';
-      case 'info':
+      case "success":
+        return "text-green-600";
+      case "error":
+        return "text-red-600";
+      case "warning":
+        return "text-yellow-600";
+      case "info":
       default:
-        return 'text-blue-600';
+        return "text-blue-600";
     }
   };
 
@@ -58,7 +65,7 @@ const Notifications = ({ notifications = [], onRemove, maxVisible = 5 }) => {
     const diffInSeconds = Math.floor((now - notificationTime) / 1000);
 
     if (diffInSeconds < 60) {
-      return 'Just now';
+      return "Just now";
     } else if (diffInSeconds < 3600) {
       const minutes = Math.floor(diffInSeconds / 60);
       return `${minutes}m ago`;
@@ -79,7 +86,7 @@ const Notifications = ({ notifications = [], onRemove, maxVisible = 5 }) => {
     <div className="fixed top-4 right-4 z-50 space-y-3 max-w-sm w-full pointer-events-none">
       {visibleNotifications.map((notification, index) => {
         const IconComponent = getNotificationIcon(notification.type);
-        
+
         return (
           <div
             key={notification.id}
@@ -91,16 +98,16 @@ const Notifications = ({ notifications = [], onRemove, maxVisible = 5 }) => {
             `}
             style={{
               animationDelay: `${index * 100}ms`,
-              animationFillMode: 'both'
+              animationFillMode: "both",
             }}
           >
             {/* Progress bar for timed notifications */}
             {notification.duration > 0 && (
               <div className="absolute top-0 left-0 right-0 h-1 bg-black/10">
-                <div 
+                <div
                   className="h-full bg-current opacity-30 transition-all ease-linear"
                   style={{
-                    animation: `shrink ${notification.duration}ms linear forwards`
+                    animation: `shrink ${notification.duration}ms linear forwards`,
                   }}
                 />
               </div>
@@ -109,7 +116,9 @@ const Notifications = ({ notifications = [], onRemove, maxVisible = 5 }) => {
             <div className="flex items-start space-x-3">
               {/* Icon */}
               <div className="flex-shrink-0">
-                <IconComponent className={`h-5 w-5 ${getIconStyles(notification.type)}`} />
+                <IconComponent
+                  className={`h-5 w-5 ${getIconStyles(notification.type)}`}
+                />
               </div>
 
               {/* Content */}
@@ -187,7 +196,7 @@ const Notifications = ({ notifications = [], onRemove, maxVisible = 5 }) => {
             width: 0%;
           }
         }
-        
+
         @keyframes slide-in-right {
           from {
             transform: translateX(100%);
@@ -198,7 +207,7 @@ const Notifications = ({ notifications = [], onRemove, maxVisible = 5 }) => {
             opacity: 1;
           }
         }
-        
+
         .animate-slide-in-right {
           animation: slide-in-right 0.3s ease-out;
         }
@@ -208,11 +217,7 @@ const Notifications = ({ notifications = [], onRemove, maxVisible = 5 }) => {
 };
 
 // Enhanced notification component with built-in auto-dismiss
-export const NotificationItem = ({ 
-  notification, 
-  onRemove, 
-  index = 0 
-}) => {
+export const NotificationItem = ({ notification, onRemove, index = 0 }) => {
   const [isVisible, setIsVisible] = useState(true);
   const [progress, setProgress] = useState(100);
 
@@ -220,8 +225,8 @@ export const NotificationItem = ({
     if (notification.duration > 0) {
       // Update progress bar
       const progressInterval = setInterval(() => {
-        setProgress(prev => {
-          const newProgress = prev - (100 / (notification.duration / 100));
+        setProgress((prev) => {
+          const newProgress = prev - 100 / (notification.duration / 100);
           if (newProgress <= 0) {
             clearInterval(progressInterval);
             handleDismiss();
@@ -248,18 +253,18 @@ export const NotificationItem = ({
     <div
       className={`
         transform transition-all duration-300 ease-out
-        ${isVisible ? 'translate-x-0 opacity-100' : 'translate-x-full opacity-0'}
+        ${isVisible ? "translate-x-0 opacity-100" : "translate-x-full opacity-0"}
         ${getNotificationStyles(notification.type)}
         rounded-lg p-4 relative overflow-hidden
       `}
       style={{
-        animationDelay: `${index * 100}ms`
+        animationDelay: `${index * 100}ms`,
       }}
     >
       {/* Progress bar */}
       {notification.duration > 0 && (
         <div className="absolute top-0 left-0 right-0 h-1 bg-black/10">
-          <div 
+          <div
             className="h-full bg-current opacity-30 transition-all duration-100 ease-linear"
             style={{ width: `${progress}%` }}
           />
@@ -268,19 +273,17 @@ export const NotificationItem = ({
 
       <div className="flex items-start space-x-3">
         <div className="flex-shrink-0">
-          <IconComponent className={`h-5 w-5 ${getIconStyles(notification.type)}`} />
+          <IconComponent
+            className={`h-5 w-5 ${getIconStyles(notification.type)}`}
+          />
         </div>
 
         <div className="flex-1 min-w-0">
           {notification.title && (
-            <h4 className="font-semibold text-sm mb-1">
-              {notification.title}
-            </h4>
+            <h4 className="font-semibold text-sm mb-1">{notification.title}</h4>
           )}
-          
-          <p className="text-sm leading-relaxed">
-            {notification.message}
-          </p>
+
+          <p className="text-sm leading-relaxed">{notification.message}</p>
 
           <div className="flex items-center justify-between mt-2">
             <div className="flex items-center space-x-2 text-xs opacity-75">
@@ -321,13 +324,13 @@ export const NotificationItem = ({
 // Helper functions (move these to top if needed in other parts)
 function getNotificationIcon(type) {
   switch (type) {
-    case 'success':
+    case "success":
       return CheckCircle;
-    case 'error':
+    case "error":
       return AlertCircle;
-    case 'warning':
+    case "warning":
       return AlertTriangle;
-    case 'info':
+    case "info":
     default:
       return Info;
   }
@@ -335,15 +338,15 @@ function getNotificationIcon(type) {
 
 function getNotificationStyles(type) {
   const baseStyles = "border-l-4 shadow-lg backdrop-blur-sm";
-  
+
   switch (type) {
-    case 'success':
+    case "success":
       return `${baseStyles} bg-green-50/95 border-l-green-500 text-green-800`;
-    case 'error':
+    case "error":
       return `${baseStyles} bg-red-50/95 border-l-red-500 text-red-800`;
-    case 'warning':
+    case "warning":
       return `${baseStyles} bg-yellow-50/95 border-l-yellow-500 text-yellow-800`;
-    case 'info':
+    case "info":
     default:
       return `${baseStyles} bg-blue-50/95 border-l-blue-500 text-blue-800`;
   }
@@ -351,15 +354,15 @@ function getNotificationStyles(type) {
 
 function getIconStyles(type) {
   switch (type) {
-    case 'success':
-      return 'text-green-600';
-    case 'error':
-      return 'text-red-600';
-    case 'warning':
-      return 'text-yellow-600';
-    case 'info':
+    case "success":
+      return "text-green-600";
+    case "error":
+      return "text-red-600";
+    case "warning":
+      return "text-yellow-600";
+    case "info":
     default:
-      return 'text-blue-600';
+      return "text-blue-600";
   }
 }
 
@@ -369,7 +372,7 @@ function formatTimestamp(timestamp) {
   const diffInSeconds = Math.floor((now - notificationTime) / 1000);
 
   if (diffInSeconds < 60) {
-    return 'Just now';
+    return "Just now";
   } else if (diffInSeconds < 3600) {
     const minutes = Math.floor(diffInSeconds / 60);
     return `${minutes}m ago`;

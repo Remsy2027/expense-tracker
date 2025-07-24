@@ -1,39 +1,39 @@
-import React, { createContext, useContext, useReducer, useEffect } from 'react';
-import { formatCurrency, validateTransaction } from '../utils/helpers';
-import { CATEGORIES, STORAGE_KEYS } from '../utils/constants';
+import React, { createContext, useContext, useReducer, useEffect } from "react";
+import { formatCurrency, validateTransaction } from "../utils/helpers";
+import { CATEGORIES, STORAGE_KEYS } from "../utils/constants";
 
 // Initial state
 const initialState = {
   dailyData: {},
-  currentDate: new Date().toISOString().split('T')[0],
+  currentDate: new Date().toISOString().split("T")[0],
   loading: false,
   error: null,
   lastBackup: null,
   settings: {
-    currency: 'INR',
-    dateFormat: 'dd/MM/yyyy',
-    theme: 'light',
+    currency: "INR",
+    dateFormat: "dd/MM/yyyy",
+    theme: "light",
     autoBackup: true,
     notifications: true,
-    defaultCategory: 'Other'
-  }
+    defaultCategory: "Other",
+  },
 };
 
 // Action types
 const ActionTypes = {
-  SET_LOADING: 'SET_LOADING',
-  SET_ERROR: 'SET_ERROR',
-  CLEAR_ERROR: 'CLEAR_ERROR',
-  SET_CURRENT_DATE: 'SET_CURRENT_DATE',
-  SET_DAILY_DATA: 'SET_DAILY_DATA',
-  ADD_INCOME: 'ADD_INCOME',
-  ADD_EXPENSE: 'ADD_EXPENSE',
-  DELETE_TRANSACTION: 'DELETE_TRANSACTION',
-  UPDATE_TRANSACTION: 'UPDATE_TRANSACTION',
-  CLEAR_DAY_DATA: 'CLEAR_DAY_DATA',
-  IMPORT_DATA: 'IMPORT_DATA',
-  UPDATE_SETTINGS: 'UPDATE_SETTINGS',
-  SET_LAST_BACKUP: 'SET_LAST_BACKUP'
+  SET_LOADING: "SET_LOADING",
+  SET_ERROR: "SET_ERROR",
+  CLEAR_ERROR: "CLEAR_ERROR",
+  SET_CURRENT_DATE: "SET_CURRENT_DATE",
+  SET_DAILY_DATA: "SET_DAILY_DATA",
+  ADD_INCOME: "ADD_INCOME",
+  ADD_EXPENSE: "ADD_EXPENSE",
+  DELETE_TRANSACTION: "DELETE_TRANSACTION",
+  UPDATE_TRANSACTION: "UPDATE_TRANSACTION",
+  CLEAR_DAY_DATA: "CLEAR_DAY_DATA",
+  IMPORT_DATA: "IMPORT_DATA",
+  UPDATE_SETTINGS: "UPDATE_SETTINGS",
+  SET_LAST_BACKUP: "SET_LAST_BACKUP",
 };
 
 // Reducer function
@@ -42,32 +42,32 @@ function expenseReducer(state, action) {
     case ActionTypes.SET_LOADING:
       return {
         ...state,
-        loading: action.payload
+        loading: action.payload,
       };
 
     case ActionTypes.SET_ERROR:
       return {
         ...state,
         error: action.payload,
-        loading: false
+        loading: false,
       };
 
     case ActionTypes.CLEAR_ERROR:
       return {
         ...state,
-        error: null
+        error: null,
       };
 
     case ActionTypes.SET_CURRENT_DATE:
       return {
         ...state,
-        currentDate: action.payload
+        currentDate: action.payload,
       };
 
     case ActionTypes.SET_DAILY_DATA:
       return {
         ...state,
-        dailyData: action.payload
+        dailyData: action.payload,
       };
 
     case ActionTypes.ADD_INCOME:
@@ -79,9 +79,9 @@ function expenseReducer(state, action) {
           [incomeDate]: {
             ...state.dailyData[incomeDate],
             income: [...(state.dailyData[incomeDate]?.income || []), income],
-            expenses: state.dailyData[incomeDate]?.expenses || []
-          }
-        }
+            expenses: state.dailyData[incomeDate]?.expenses || [],
+          },
+        },
       };
 
     case ActionTypes.ADD_EXPENSE:
@@ -92,14 +92,21 @@ function expenseReducer(state, action) {
           ...state.dailyData,
           [expenseDate]: {
             ...state.dailyData[expenseDate],
-            expenses: [...(state.dailyData[expenseDate]?.expenses || []), expense],
-            income: state.dailyData[expenseDate]?.income || []
-          }
-        }
+            expenses: [
+              ...(state.dailyData[expenseDate]?.expenses || []),
+              expense,
+            ],
+            income: state.dailyData[expenseDate]?.income || [],
+          },
+        },
       };
 
     case ActionTypes.DELETE_TRANSACTION:
-      const { date: deleteDate, transactionId, transactionType } = action.payload;
+      const {
+        date: deleteDate,
+        transactionId,
+        transactionType,
+      } = action.payload;
       const currentDayData = state.dailyData[deleteDate];
       if (!currentDayData) return state;
 
@@ -110,14 +117,19 @@ function expenseReducer(state, action) {
           [deleteDate]: {
             ...currentDayData,
             [transactionType]: currentDayData[transactionType].filter(
-              item => item.id !== transactionId
-            )
-          }
-        }
+              (item) => item.id !== transactionId,
+            ),
+          },
+        },
       };
 
     case ActionTypes.UPDATE_TRANSACTION:
-      const { date: updateDate, transactionId: updateId, transactionType: updateType, updatedData } = action.payload;
+      const {
+        date: updateDate,
+        transactionId: updateId,
+        transactionType: updateType,
+        updatedData,
+      } = action.payload;
       const dayData = state.dailyData[updateDate];
       if (!dayData) return state;
 
@@ -127,11 +139,11 @@ function expenseReducer(state, action) {
           ...state.dailyData,
           [updateDate]: {
             ...dayData,
-            [updateType]: dayData[updateType].map(item =>
-              item.id === updateId ? { ...item, ...updatedData } : item
-            )
-          }
-        }
+            [updateType]: dayData[updateType].map((item) =>
+              item.id === updateId ? { ...item, ...updatedData } : item,
+            ),
+          },
+        },
       };
 
     case ActionTypes.CLEAR_DAY_DATA:
@@ -139,14 +151,14 @@ function expenseReducer(state, action) {
       const { [clearDate]: removed, ...remainingData } = state.dailyData;
       return {
         ...state,
-        dailyData: remainingData
+        dailyData: remainingData,
       };
 
     case ActionTypes.IMPORT_DATA:
       return {
         ...state,
         dailyData: action.payload,
-        lastBackup: new Date().toISOString()
+        lastBackup: new Date().toISOString(),
       };
 
     case ActionTypes.UPDATE_SETTINGS:
@@ -154,14 +166,14 @@ function expenseReducer(state, action) {
         ...state,
         settings: {
           ...state.settings,
-          ...action.payload
-        }
+          ...action.payload,
+        },
       };
 
     case ActionTypes.SET_LAST_BACKUP:
       return {
         ...state,
-        lastBackup: action.payload
+        lastBackup: action.payload,
       };
 
     default:
@@ -193,7 +205,10 @@ export function ExpenseProvider({ children }) {
         const storedSettings = localStorage.getItem(STORAGE_KEYS.SETTINGS);
         if (storedSettings) {
           const parsedSettings = JSON.parse(storedSettings);
-          dispatch({ type: ActionTypes.UPDATE_SETTINGS, payload: parsedSettings });
+          dispatch({
+            type: ActionTypes.UPDATE_SETTINGS,
+            payload: parsedSettings,
+          });
         }
 
         // Load last backup date
@@ -207,10 +222,12 @@ export function ExpenseProvider({ children }) {
         if (storedDate) {
           dispatch({ type: ActionTypes.SET_CURRENT_DATE, payload: storedDate });
         }
-
       } catch (error) {
-        console.error('Failed to load stored data:', error);
-        dispatch({ type: ActionTypes.SET_ERROR, payload: 'Failed to load stored data' });
+        console.error("Failed to load stored data:", error);
+        dispatch({
+          type: ActionTypes.SET_ERROR,
+          payload: "Failed to load stored data",
+        });
       } finally {
         dispatch({ type: ActionTypes.SET_LOADING, payload: false });
       }
@@ -222,17 +239,23 @@ export function ExpenseProvider({ children }) {
   // Save data to localStorage whenever it changes
   useEffect(() => {
     try {
-      localStorage.setItem(STORAGE_KEYS.DAILY_DATA, JSON.stringify(state.dailyData));
+      localStorage.setItem(
+        STORAGE_KEYS.DAILY_DATA,
+        JSON.stringify(state.dailyData),
+      );
     } catch (error) {
-      console.error('Failed to save daily data:', error);
+      console.error("Failed to save daily data:", error);
     }
   }, [state.dailyData]);
 
   useEffect(() => {
     try {
-      localStorage.setItem(STORAGE_KEYS.SETTINGS, JSON.stringify(state.settings));
+      localStorage.setItem(
+        STORAGE_KEYS.SETTINGS,
+        JSON.stringify(state.settings),
+      );
     } catch (error) {
-      console.error('Failed to save settings:', error);
+      console.error("Failed to save settings:", error);
     }
   }, [state.settings]);
 
@@ -240,7 +263,7 @@ export function ExpenseProvider({ children }) {
     try {
       localStorage.setItem(STORAGE_KEYS.CURRENT_DATE, state.currentDate);
     } catch (error) {
-      console.error('Failed to save current date:', error);
+      console.error("Failed to save current date:", error);
     }
   }, [state.currentDate]);
 
@@ -252,25 +275,25 @@ export function ExpenseProvider({ children }) {
 
     addIncome: (date, incomeData) => {
       try {
-        const validation = validateTransaction(incomeData, 'income');
+        const validation = validateTransaction(incomeData, "income");
         if (!validation.isValid) {
-          throw new Error(validation.errors.join(', '));
+          throw new Error(validation.errors.join(", "));
         }
 
         const income = {
           id: Date.now() + Math.random(),
           ...incomeData,
           amount: parseFloat(incomeData.amount),
-          time: new Date().toLocaleTimeString('en-IN', { 
-            hour: '2-digit', 
-            minute: '2-digit' 
+          time: new Date().toLocaleTimeString("en-IN", {
+            hour: "2-digit",
+            minute: "2-digit",
           }),
-          createdAt: new Date().toISOString()
+          createdAt: new Date().toISOString(),
         };
 
-        dispatch({ 
-          type: ActionTypes.ADD_INCOME, 
-          payload: { date, income } 
+        dispatch({
+          type: ActionTypes.ADD_INCOME,
+          payload: { date, income },
         });
 
         return { success: true, data: income };
@@ -282,25 +305,25 @@ export function ExpenseProvider({ children }) {
 
     addExpense: (date, expenseData) => {
       try {
-        const validation = validateTransaction(expenseData, 'expense');
+        const validation = validateTransaction(expenseData, "expense");
         if (!validation.isValid) {
-          throw new Error(validation.errors.join(', '));
+          throw new Error(validation.errors.join(", "));
         }
 
         const expense = {
           id: Date.now() + Math.random(),
           ...expenseData,
           amount: parseFloat(expenseData.amount),
-          time: new Date().toLocaleTimeString('en-IN', { 
-            hour: '2-digit', 
-            minute: '2-digit' 
+          time: new Date().toLocaleTimeString("en-IN", {
+            hour: "2-digit",
+            minute: "2-digit",
           }),
-          createdAt: new Date().toISOString()
+          createdAt: new Date().toISOString(),
         };
 
-        dispatch({ 
-          type: ActionTypes.ADD_EXPENSE, 
-          payload: { date, expense } 
+        dispatch({
+          type: ActionTypes.ADD_EXPENSE,
+          payload: { date, expense },
         });
 
         return { success: true, data: expense };
@@ -314,7 +337,7 @@ export function ExpenseProvider({ children }) {
       try {
         dispatch({
           type: ActionTypes.DELETE_TRANSACTION,
-          payload: { date, transactionId, transactionType }
+          payload: { date, transactionId, transactionType },
         });
         return { success: true };
       } catch (error) {
@@ -325,23 +348,26 @@ export function ExpenseProvider({ children }) {
 
     updateTransaction: (date, transactionId, transactionType, updatedData) => {
       try {
-        const validation = validateTransaction(updatedData, transactionType.slice(0, -1));
+        const validation = validateTransaction(
+          updatedData,
+          transactionType.slice(0, -1),
+        );
         if (!validation.isValid) {
-          throw new Error(validation.errors.join(', '));
+          throw new Error(validation.errors.join(", "));
         }
 
         dispatch({
           type: ActionTypes.UPDATE_TRANSACTION,
-          payload: { 
-            date, 
-            transactionId, 
-            transactionType, 
+          payload: {
+            date,
+            transactionId,
+            transactionType,
             updatedData: {
               ...updatedData,
               amount: parseFloat(updatedData.amount),
-              updatedAt: new Date().toISOString()
-            }
-          }
+              updatedAt: new Date().toISOString(),
+            },
+          },
         });
 
         return { success: true };
@@ -352,11 +378,15 @@ export function ExpenseProvider({ children }) {
     },
 
     clearDayData: (date) => {
-      if (window.confirm('Are you sure you want to clear all transactions for this date? This action cannot be undone.')) {
+      if (
+        window.confirm(
+          "Are you sure you want to clear all transactions for this date? This action cannot be undone.",
+        )
+      ) {
         dispatch({ type: ActionTypes.CLEAR_DAY_DATA, payload: { date } });
         return { success: true };
       }
-      return { success: false, error: 'Operation cancelled' };
+      return { success: false, error: "Operation cancelled" };
     },
 
     exportData: () => {
@@ -365,51 +395,71 @@ export function ExpenseProvider({ children }) {
           dailyData: state.dailyData,
           settings: state.settings,
           exportDate: new Date().toISOString(),
-          version: '1.0.0'
+          version: "1.0.0",
         };
 
         const dataStr = JSON.stringify(exportData, null, 2);
-        const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
-        
-        const exportFileDefaultName = `expense-tracker-backup-${new Date().toISOString().split('T')[0]}.json`;
-        
-        const linkElement = document.createElement('a');
-        linkElement.setAttribute('href', dataUri);
-        linkElement.setAttribute('download', exportFileDefaultName);
+        const dataUri =
+          "data:application/json;charset=utf-8," + encodeURIComponent(dataStr);
+
+        const exportFileDefaultName = `expense-tracker-backup-${new Date().toISOString().split("T")[0]}.json`;
+
+        const linkElement = document.createElement("a");
+        linkElement.setAttribute("href", dataUri);
+        linkElement.setAttribute("download", exportFileDefaultName);
         linkElement.click();
 
-        dispatch({ type: ActionTypes.SET_LAST_BACKUP, payload: new Date().toISOString() });
-        
+        dispatch({
+          type: ActionTypes.SET_LAST_BACKUP,
+          payload: new Date().toISOString(),
+        });
+
         return { success: true };
       } catch (error) {
-        dispatch({ type: ActionTypes.SET_ERROR, payload: 'Failed to export data' });
-        return { success: false, error: 'Failed to export data' };
+        dispatch({
+          type: ActionTypes.SET_ERROR,
+          payload: "Failed to export data",
+        });
+        return { success: false, error: "Failed to export data" };
       }
     },
 
     importData: (fileData) => {
       try {
         const parsedData = JSON.parse(fileData);
-        
+
         // Validate data structure
-        if (!parsedData.dailyData || typeof parsedData.dailyData !== 'object') {
-          throw new Error('Invalid data format');
+        if (!parsedData.dailyData || typeof parsedData.dailyData !== "object") {
+          throw new Error("Invalid data format");
         }
 
-        if (window.confirm('This will replace all existing data. Are you sure you want to continue?')) {
-          dispatch({ type: ActionTypes.IMPORT_DATA, payload: parsedData.dailyData });
-          
+        if (
+          window.confirm(
+            "This will replace all existing data. Are you sure you want to continue?",
+          )
+        ) {
+          dispatch({
+            type: ActionTypes.IMPORT_DATA,
+            payload: parsedData.dailyData,
+          });
+
           if (parsedData.settings) {
-            dispatch({ type: ActionTypes.UPDATE_SETTINGS, payload: parsedData.settings });
+            dispatch({
+              type: ActionTypes.UPDATE_SETTINGS,
+              payload: parsedData.settings,
+            });
           }
 
           return { success: true };
         }
-        
-        return { success: false, error: 'Import cancelled' };
+
+        return { success: false, error: "Import cancelled" };
       } catch (error) {
-        dispatch({ type: ActionTypes.SET_ERROR, payload: 'Failed to import data. Please check file format.' });
-        return { success: false, error: 'Failed to import data' };
+        dispatch({
+          type: ActionTypes.SET_ERROR,
+          payload: "Failed to import data. Please check file format.",
+        });
+        return { success: false, error: "Failed to import data" };
       }
     },
 
@@ -423,15 +473,22 @@ export function ExpenseProvider({ children }) {
 
     calculateDayStats: (date) => {
       const dayData = state.dailyData[date] || { income: [], expenses: [] };
-      const totalIncome = dayData.income.reduce((sum, item) => sum + item.amount, 0);
-      const totalExpenses = dayData.expenses.reduce((sum, item) => sum + item.amount, 0);
+      const totalIncome = dayData.income.reduce(
+        (sum, item) => sum + item.amount,
+        0,
+      );
+      const totalExpenses = dayData.expenses.reduce(
+        (sum, item) => sum + item.amount,
+        0,
+      );
       const balance = totalIncome - totalExpenses;
       const transactionCount = dayData.income.length + dayData.expenses.length;
 
       // Category breakdown
       const categoryTotals = {};
-      dayData.expenses.forEach(expense => {
-        categoryTotals[expense.category] = (categoryTotals[expense.category] || 0) + expense.amount;
+      dayData.expenses.forEach((expense) => {
+        categoryTotals[expense.category] =
+          (categoryTotals[expense.category] || 0) + expense.amount;
       });
 
       return {
@@ -440,7 +497,7 @@ export function ExpenseProvider({ children }) {
         balance,
         transactionCount,
         categoryTotals,
-        hasTransactions: transactionCount > 0
+        hasTransactions: transactionCount > 0,
       };
     },
 
@@ -448,7 +505,7 @@ export function ExpenseProvider({ children }) {
       const currentMonth = new Date(date).getMonth();
       const currentYear = new Date(date).getFullYear();
       const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
-      
+
       let monthlyIncome = 0;
       let monthlyExpenses = 0;
       let activeDays = 0;
@@ -456,19 +513,19 @@ export function ExpenseProvider({ children }) {
 
       // Calculate for each day of the month
       for (let day = 1; day <= daysInMonth; day++) {
-        const dateStr = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+        const dateStr = `${currentYear}-${String(currentMonth + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
         const dayStats = actions.calculateDayStats(dateStr);
-        
+
         monthlyIncome += dayStats.totalIncome;
         monthlyExpenses += dayStats.totalExpenses;
-        
+
         if (dayStats.hasTransactions) {
           activeDays++;
         }
 
         dailyStats.push({
           date: dateStr,
-          ...dayStats
+          ...dayStats,
         });
       }
 
@@ -482,14 +539,14 @@ export function ExpenseProvider({ children }) {
         activeDays,
         daysInMonth,
         progressPercentage,
-        dailyStats
+        dailyStats,
       };
-    }
+    },
   };
 
   const contextValue = {
     ...state,
-    ...actions
+    ...actions,
   };
 
   return (
@@ -503,7 +560,7 @@ export function ExpenseProvider({ children }) {
 export function useExpenseContext() {
   const context = useContext(ExpenseContext);
   if (!context) {
-    throw new Error('useExpenseContext must be used within an ExpenseProvider');
+    throw new Error("useExpenseContext must be used within an ExpenseProvider");
   }
   return context;
 }

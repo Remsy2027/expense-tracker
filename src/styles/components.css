@@ -1,0 +1,526 @@
+/* Component-specific styles for ExpenseFlow */
+
+/* Button Components */
+.btn {
+  @apply inline-flex items-center justify-center;
+  @apply px-4 py-2 text-sm font-medium;
+  @apply border border-transparent rounded-lg;
+  @apply transition-all duration-200 ease-in-out;
+  @apply focus:outline-none focus:ring-2 focus:ring-offset-2;
+  @apply disabled:opacity-50 disabled:cursor-not-allowed;
+  @apply relative overflow-hidden;
+  
+  /* Button hover effect */
+  &::before {
+    content: '';
+    @apply absolute inset-0 bg-white opacity-0;
+    @apply transition-opacity duration-200;
+  }
+  
+  &:hover::before {
+    @apply opacity-10;
+  }
+  
+  /* Button active state */
+  &:active {
+    @apply transform scale-95;
+  }
+}
+
+.btn-sm {
+  @apply px-3 py-1.5 text-xs;
+}
+
+.btn-lg {
+  @apply px-6 py-3 text-base;
+}
+
+.btn-xl {
+  @apply px-8 py-4 text-lg;
+}
+
+/* Card Components */
+.card {
+  @apply bg-white rounded-xl shadow-sm border border-gray-200;
+  @apply transition-all duration-200 ease-in-out;
+  @apply relative overflow-hidden;
+}
+
+.card-hover {
+  @apply hover:shadow-md hover:-translate-y-1;
+}
+
+.card-interactive {
+  @apply cursor-pointer;
+  @apply hover:shadow-lg hover:-translate-y-2;
+  @apply active:transform active:scale-98;
+}
+
+.card-gradient {
+  @apply bg-gradient-to-br from-white to-gray-50;
+}
+
+.card-header {
+  @apply flex items-center justify-between;
+  @apply p-6 pb-4 border-b border-gray-100;
+}
+
+.card-content {
+  @apply p-6;
+}
+
+.card-footer {
+  @apply p-6 pt-4 border-t border-gray-100;
+  @apply bg-gray-50;
+}
+
+/* Input Components */
+.form-input {
+  @apply w-full px-4 py-2 text-base;
+  @apply border border-gray-300 rounded-lg;
+  @apply bg-white placeholder-gray-400;
+  @apply transition-all duration-200;
+  @apply focus:ring-2 focus:ring-indigo-500 focus:border-transparent;
+}
+
+.form-input-sm {
+  @apply px-3 py-1.5 text-sm;
+}
+
+.form-input-lg {
+  @apply px-5 py-3 text-lg;
+}
+
+.form-input-error {
+  @apply border-red-300 focus:ring-red-500;
+}
+
+.form-input-success {
+  @apply border-green-300 focus:ring-green-500;
+}
+
+.form-label {
+  @apply block text-sm font-medium text-gray-700 mb-2;
+}
+
+.form-error {
+  @apply mt-1 text-sm text-red-600;
+}
+
+.form-help {
+  @apply mt-1 text-sm text-gray-500;
+}
+
+/* Select Components */
+.form-select {
+  @apply w-full px-4 py-2 text-base;
+  @apply border border-gray-300 rounded-lg;
+  @apply bg-white;
+  @apply transition-all duration-200;
+  @apply focus:ring-2 focus:ring-indigo-500 focus:border-transparent;
+  @apply appearance-none;
+  
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e");
+  background-position: right 0.5rem center;
+  background-repeat: no-repeat;
+  background-size: 1.5em 1.5em;
+  padding-right: 2.5rem;
+}
+
+/* Badge Components */
+.badge {
+  @apply inline-flex items-center px-2.5 py-0.5;
+  @apply text-xs font-medium rounded-full;
+}
+
+.badge-primary {
+  @apply bg-indigo-100 text-indigo-800;
+}
+
+.badge-success {
+  @apply bg-green-100 text-green-800;
+}
+
+.badge-danger {
+  @apply bg-red-100 text-red-800;
+}
+
+.badge-warning {
+  @apply bg-yellow-100 text-yellow-800;
+}
+
+.badge-info {
+  @apply bg-blue-100 text-blue-800;
+}
+
+.badge-secondary {
+  @apply bg-gray-100 text-gray-800;
+}
+
+/* Alert Components */
+.alert {
+  @apply p-4 rounded-lg border;
+  @apply flex items-start space-x-3;
+}
+
+.alert-success {
+  @apply bg-green-50 border-green-200 text-green-800;
+}
+
+.alert-danger {
+  @apply bg-red-50 border-red-200 text-red-800;
+}
+
+.alert-warning {
+  @apply bg-yellow-50 border-yellow-200 text-yellow-800;
+}
+
+.alert-info {
+  @apply bg-blue-50 border-blue-200 text-blue-800;
+}
+
+/* Modal Components */
+.modal-overlay {
+  @apply fixed inset-0 bg-black bg-opacity-50;
+  @apply flex items-center justify-center p-4;
+  @apply z-50;
+}
+
+.modal-content {
+  @apply bg-white rounded-xl shadow-2xl;
+  @apply max-w-lg w-full max-h-screen overflow-y-auto;
+  @apply transform transition-all duration-300;
+}
+
+.modal-header {
+  @apply flex items-center justify-between p-6 border-b border-gray-200;
+}
+
+.modal-body {
+  @apply p-6;
+}
+
+.modal-footer {
+  @apply flex items-center justify-end space-x-3 p-6 border-t border-gray-200;
+}
+
+/* Dropdown Components */
+.dropdown {
+  @apply relative inline-block text-left;
+}
+
+.dropdown-menu {
+  @apply absolute right-0 mt-2 w-56;
+  @apply bg-white rounded-lg shadow-lg border border-gray-200;
+  @apply py-1 z-50;
+  @apply transform opacity-0 scale-95;
+  @apply transition-all duration-200;
+}
+
+.dropdown-menu.show {
+  @apply opacity-100 scale-100;
+}
+
+.dropdown-item {
+  @apply block w-full text-left px-4 py-2 text-sm text-gray-700;
+  @apply hover:bg-gray-100 hover:text-gray-900;
+  @apply transition-colors duration-150;
+}
+
+/* Navigation Components */
+.nav-tab {
+  @apply relative px-4 py-2 text-sm font-medium;
+  @apply text-gray-600 hover:text-gray-900;
+  @apply border-b-2 border-transparent;
+  @apply transition-all duration-200;
+}
+
+.nav-tab.active {
+  @apply text-indigo-600 border-indigo-600;
+}
+
+.nav-tab::after {
+  content: '';
+  @apply absolute bottom-0 left-0 w-full h-0.5;
+  @apply bg-indigo-600 transform scale-x-0;
+  @apply transition-transform duration-200;
+}
+
+.nav-tab.active::after {
+  @apply scale-x-100;
+}
+
+/* Progress Components */
+.progress {
+  @apply w-full bg-gray-200 rounded-full h-2;
+  @apply overflow-hidden;
+}
+
+.progress-bar {
+  @apply h-full bg-indigo-600 rounded-full;
+  @apply transition-all duration-500 ease-out;
+}
+
+.progress-sm {
+  @apply h-1;
+}
+
+.progress-lg {
+  @apply h-4;
+}
+
+/* Avatar Components */
+.avatar {
+  @apply inline-flex items-center justify-center;
+  @apply rounded-full bg-gray-500 text-white font-medium;
+}
+
+.avatar-sm {
+  @apply w-8 h-8 text-xs;
+}
+
+.avatar-md {
+  @apply w-10 h-10 text-sm;
+}
+
+.avatar-lg {
+  @apply w-12 h-12 text-base;
+}
+
+.avatar-xl {
+  @apply w-16 h-16 text-lg;
+}
+
+/* Table Components */
+.table {
+  @apply w-full border-collapse;
+}
+
+.table-auto {
+  @apply table-auto;
+}
+
+.table-fixed {
+  @apply table-fixed;
+}
+
+.table th {
+  @apply px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider;
+  @apply bg-gray-50 border-b border-gray-200;
+}
+
+.table td {
+  @apply px-6 py-4 whitespace-nowrap text-sm text-gray-900;
+  @apply border-b border-gray-200;
+}
+
+.table-striped tbody tr:nth-child(even) {
+  @apply bg-gray-50;
+}
+
+.table-hover tbody tr:hover {
+  @apply bg-gray-50;
+}
+
+/* Skeleton Loading Components */
+.skeleton {
+  @apply bg-gray-200 animate-pulse rounded;
+}
+
+.skeleton-text {
+  @apply h-4 bg-gray-200 rounded animate-pulse;
+}
+
+.skeleton-text-sm {
+  @apply h-3;
+}
+
+.skeleton-text-lg {
+  @apply h-5;
+}
+
+.skeleton-circle {
+  @apply rounded-full bg-gray-200 animate-pulse;
+}
+
+/* Chart Container */
+.chart-container {
+  @apply relative;
+}
+
+.chart-container .recharts-wrapper {
+  @apply w-full;
+}
+
+.chart-tooltip {
+  @apply bg-white border border-gray-200 rounded-lg shadow-lg p-3;
+  @apply text-sm;
+}
+
+/* Expense Category Colors */
+.category-food { @apply bg-red-500; }
+.category-transport { @apply bg-cyan-500; }
+.category-shopping { @apply bg-blue-500; }
+.category-bills { @apply bg-green-500; }
+.category-entertainment { @apply bg-yellow-500; }
+.category-medical { @apply bg-pink-500; }
+.category-education { @apply bg-purple-500; }
+.category-other { @apply bg-gray-500; }
+
+/* Summary Cards */
+.summary-card {
+  @apply bg-gradient-to-br from-white to-gray-50;
+  @apply border border-gray-200 rounded-xl p-6;
+  @apply shadow-sm hover:shadow-md;
+  @apply transition-all duration-200;
+  @apply relative overflow-hidden;
+}
+
+.summary-card::before {
+  content: '';
+  @apply absolute top-0 right-0 w-24 h-24;
+  @apply bg-gradient-to-br from-white/20 to-transparent;
+  @apply rounded-full transform translate-x-8 -translate-y-8;
+}
+
+.summary-card-income {
+  @apply from-green-500 to-green-600 text-white;
+}
+
+.summary-card-expense {
+  @apply from-red-500 to-red-600 text-white;
+}
+
+.summary-card-balance {
+  @apply from-blue-500 to-blue-600 text-white;
+}
+
+.summary-card-negative {
+  @apply from-orange-500 to-orange-600 text-white;
+}
+
+/* Transaction List */
+.transaction-item {
+  @apply flex items-center justify-between p-4;
+  @apply bg-white border border-gray-200 rounded-lg;
+  @apply hover:shadow-sm transition-all duration-200;
+  @apply group;
+}
+
+.transaction-item:hover .transaction-actions {
+  @apply opacity-100;
+}
+
+.transaction-actions {
+  @apply opacity-0 transition-opacity duration-200;
+}
+
+/* Mobile Menu */
+.mobile-menu {
+  @apply fixed inset-0 z-50;
+  @apply transform transition-transform duration-300;
+}
+
+.mobile-menu.closed {
+  @apply -translate-x-full;
+}
+
+.mobile-menu-backdrop {
+  @apply absolute inset-0 bg-black bg-opacity-50;
+}
+
+.mobile-menu-panel {
+  @apply relative w-64 h-full bg-white shadow-xl;
+  @apply flex flex-col;
+}
+
+/* Notification */
+.notification {
+  @apply fixed top-4 right-4 z-60;
+  @apply max-w-sm w-full;
+  @apply bg-white border border-gray-200 rounded-lg shadow-lg;
+  @apply transform transition-all duration-300;
+  @apply translate-x-full;
+}
+
+.notification.show {
+  @apply translate-x-0;
+}
+
+.notification-success {
+  @apply border-l-4 border-l-green-500;
+}
+
+.notification-error {
+  @apply border-l-4 border-l-red-500;
+}
+
+.notification-warning {
+  @apply border-l-4 border-l-yellow-500;
+}
+
+.notification-info {
+  @apply border-l-4 border-l-blue-500;
+}
+
+/* Dark mode overrides */
+.dark .card {
+  @apply bg-gray-800 border-gray-700;
+}
+
+.dark .form-input {
+  @apply bg-gray-800 border-gray-600 text-white placeholder-gray-400;
+}
+
+.dark .form-select {
+  @apply bg-gray-800 border-gray-600 text-white;
+}
+
+.dark .table th {
+  @apply bg-gray-800 text-gray-300;
+}
+
+.dark .table td {
+  @apply text-gray-300 border-gray-700;
+}
+
+.dark .table-striped tbody tr:nth-child(even) {
+  @apply bg-gray-800;
+}
+
+.dark .table-hover tbody tr:hover {
+  @apply bg-gray-700;
+}
+
+.dark .dropdown-menu {
+  @apply bg-gray-800 border-gray-700;
+}
+
+.dark .dropdown-item {
+  @apply text-gray-300 hover:bg-gray-700 hover:text-white;
+}
+
+.dark .modal-content {
+  @apply bg-gray-800;
+}
+
+.dark .notification {
+  @apply bg-gray-800 border-gray-700;
+}
+
+/* Custom scrollbar for dark mode */
+.dark .scrollbar-thin {
+  scrollbar-color: rgb(75 85 99) rgb(31 41 55);
+}
+
+.dark .scrollbar-thin::-webkit-scrollbar-track {
+  @apply bg-gray-800;
+}
+
+.dark .scrollbar-thin::-webkit-scrollbar-thumb {
+  @apply bg-gray-600;
+}
+
+.dark .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+  @apply bg-gray-500;
+}

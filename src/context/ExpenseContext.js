@@ -1,6 +1,7 @@
+// src/context/ExpenseContext.js
 import React, { createContext, useContext, useReducer, useEffect } from "react";
-import { formatCurrency, validateTransaction } from "../utils/helpers";
-import { CATEGORIES, STORAGE_KEYS } from "../utils/constants";
+import { transactionsAPI, analyticsAPI, settingsAPI, apiHelpers } from "../services/api";
+import { useAuth } from "./AuthContext";
 
 // Initial state
 const initialState = {
@@ -8,7 +9,6 @@ const initialState = {
   currentDate: new Date().toISOString().split("T")[0],
   loading: false,
   error: null,
-  lastBackup: null,
   settings: {
     currency: "INR",
     dateFormat: "dd/MM/yyyy",
@@ -17,6 +17,8 @@ const initialState = {
     notifications: true,
     defaultCategory: "Other",
   },
+  isOnline: navigator.onLine,
+  syncStatus: 'synced', // 'synced', 'syncing', 'offline', 'error'
 };
 
 // Action types
@@ -26,155 +28,90 @@ const ActionTypes = {
   CLEAR_ERROR: "CLEAR_ERROR",
   SET_CURRENT_DATE: "SET_CURRENT_DATE",
   SET_DAILY_DATA: "SET_DAILY_DATA",
-  ADD_INCOME: "ADD_INCOME",
-  ADD_EXPENSE: "ADD_EXPENSE",
-  DELETE_TRANSACTION: "DELETE_TRANSACTION",
+  ADD_TRANSACTION: "ADD_TRANSACTION",
   UPDATE_TRANSACTION: "UPDATE_TRANSACTION",
-  CLEAR_DAY_DATA: "CLEAR_DAY_DATA",
-  IMPORT_DATA: "IMPORT_DATA",
-  UPDATE_SETTINGS: "UPDATE_SETTINGS",
-  SET_LAST_BACKUP: "SET_LAST_BACKUP",
+  DELETE_TRANSACTION: "DELETE_TRANSACTION",
+  SET_SETTINGS: "SET_SETTINGS",
+  SET_ONLINE_STATUS: "SET_ONLINE_STATUS",
+  SET_SYNC_STATUS: "SET_SYNC_STATUS",
+  BULK_UPDATE: "BULK_UPDATE",
 };
 
 // Reducer function
 function expenseReducer(state, action) {
   switch (action.type) {
     case ActionTypes.SET_LOADING:
-      return {
-        ...state,
-        loading: action.payload,
-      };
+      return { ...state, loading: action.payload };
 
     case ActionTypes.SET_ERROR:
-      return {
-        ...state,
-        error: action.payload,
-        loading: false,
-      };
+      return { ...state, error: action.payload, loading: false };
 
     case ActionTypes.CLEAR_ERROR:
-      return {
-        ...state,
-        error: null,
-      };
+      return { ...state, error: null };
 
     case ActionTypes.SET_CURRENT_DATE:
-      return {
-        ...state,
-        currentDate: action.payload,
-      };
+      return { ...state, currentDate: action.payload };
 
     case ActionTypes.SET_DAILY_DATA:
-      return {
-        ...state,
-        dailyData: action.payload,
-      };
+      return { ...state, dailyData: action.payload };
 
-    case ActionTypes.ADD_INCOME:
-      const { date: incomeDate, income } = action.payload;
-      return {
-        ...state,
-        dailyData: {
-          ...state.dailyData,
-          [incomeDate]: {
-            ...state.dailyData[incomeDate],
-            income: [...(state.dailyData[incomeDate]?.income || []), income],
-            expenses: state.dailyData[incomeDate]?.expenses || [],
-          },
-        },
-      };
-
-    case ActionTypes.ADD_EXPENSE:
-      const { date: expenseDate, expense } = action.payload;
-      return {
-        ...state,
-        dailyData: {
-          ...state.dailyData,
-          [expenseDate]: {
-            ...state.dailyData[expenseDate],
-            expenses: [
-              ...(state.dailyData[expenseDate]?.expenses || []),
-              expense,
-            ],
-            income: state.dailyData[expenseDate]?.income || [],
-          },
-        },
-      };
-
-    case ActionTypes.DELETE_TRANSACTION:
-      const {
-        date: deleteDate,
-        transactionId,
-        transactionType,
-      } = action.payload;
-      const currentDayData = state.dailyData[deleteDate];
-      if (!currentDayData) return state;
+    case ActionTypes.ADD_TRANSACTION:
+      const { date, transaction } = action.payload;
+      const currentData = state.dailyData[date] || { income: [], expenses: [] };
+      const transactionType = transaction.type === 'income' ? 'income' : 'expenses';
 
       return {
         ...state,
         dailyData: {
           ...state.dailyData,
-          [deleteDate]: {
-            ...currentDayData,
-            [transactionType]: currentDayData[transactionType].filter(
-              (item) => item.id !== transactionId,
-            ),
+          [date]: {
+            ...currentData,
+            [transactionType]: [...currentData[transactionType], transaction],
           },
         },
       };
 
     case ActionTypes.UPDATE_TRANSACTION:
-      const {
-        date: updateDate,
-        transactionId: updateId,
-        transactionType: updateType,
-        updatedData,
-      } = action.payload;
-      const dayData = state.dailyData[updateDate];
-      if (!dayData) return state;
+      const { date: updateDate, transactionId, updatedTransaction } = action.payload;
+      const dayData = state.dailyData[updateDate] || { income: [], expenses: [] };
 
       return {
         ...state,
         dailyData: {
           ...state.dailyData,
           [updateDate]: {
-            ...dayData,
-            [updateType]: dayData[updateType].map((item) =>
-              item.id === updateId ? { ...item, ...updatedData } : item,
-            ),
+            income: dayData.income.map(t => t.id === transactionId ? updatedTransaction : t),
+            expenses: dayData.expenses.map(t => t.id === transactionId ? updatedTransaction : t),
           },
         },
       };
 
-    case ActionTypes.CLEAR_DAY_DATA:
-      const { date: clearDate } = action.payload;
-      const { [clearDate]: removed, ...remainingData } = state.dailyData;
-      return {
-        ...state,
-        dailyData: remainingData,
-      };
+    case ActionTypes.DELETE_TRANSACTION:
+      const { date: deleteDate, transactionId: deleteId } = action.payload;
+      const deleteData = state.dailyData[deleteDate] || { income: [], expenses: [] };
 
-    case ActionTypes.IMPORT_DATA:
       return {
         ...state,
-        dailyData: action.payload,
-        lastBackup: new Date().toISOString(),
-      };
-
-    case ActionTypes.UPDATE_SETTINGS:
-      return {
-        ...state,
-        settings: {
-          ...state.settings,
-          ...action.payload,
+        dailyData: {
+          ...state.dailyData,
+          [deleteDate]: {
+            income: deleteData.income.filter(t => t.id !== deleteId),
+            expenses: deleteData.expenses.filter(t => t.id !== deleteId),
+          },
         },
       };
 
-    case ActionTypes.SET_LAST_BACKUP:
-      return {
-        ...state,
-        lastBackup: action.payload,
-      };
+    case ActionTypes.SET_SETTINGS:
+      return { ...state, settings: { ...state.settings, ...action.payload } };
+
+    case ActionTypes.SET_ONLINE_STATUS:
+      return { ...state, isOnline: action.payload };
+
+    case ActionTypes.SET_SYNC_STATUS:
+      return { ...state, syncStatus: action.payload };
+
+    case ActionTypes.BULK_UPDATE:
+      return { ...state, ...action.payload };
 
     default:
       return state;
@@ -187,308 +124,252 @@ const ExpenseContext = createContext();
 // Provider component
 export function ExpenseProvider({ children }) {
   const [state, dispatch] = useReducer(expenseReducer, initialState);
+  const { user, isAuthenticated } = useAuth();
 
-  // Load data from localStorage on mount
+  // Online/Offline detection
   useEffect(() => {
-    const loadStoredData = async () => {
-      try {
-        dispatch({ type: ActionTypes.SET_LOADING, payload: true });
+    const handleOnline = () => dispatch({ type: ActionTypes.SET_ONLINE_STATUS, payload: true });
+    const handleOffline = () => dispatch({ type: ActionTypes.SET_ONLINE_STATUS, payload: false });
 
-        // Load daily data
-        const storedData = localStorage.getItem(STORAGE_KEYS.DAILY_DATA);
-        if (storedData) {
-          const parsedData = JSON.parse(storedData);
-          dispatch({ type: ActionTypes.SET_DAILY_DATA, payload: parsedData });
-        }
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
 
-        // Load settings
-        const storedSettings = localStorage.getItem(STORAGE_KEYS.SETTINGS);
-        if (storedSettings) {
-          const parsedSettings = JSON.parse(storedSettings);
-          dispatch({
-            type: ActionTypes.UPDATE_SETTINGS,
-            payload: parsedSettings,
-          });
-        }
-
-        // Load last backup date
-        const lastBackup = localStorage.getItem(STORAGE_KEYS.LAST_BACKUP);
-        if (lastBackup) {
-          dispatch({ type: ActionTypes.SET_LAST_BACKUP, payload: lastBackup });
-        }
-
-        // Load current date
-        const storedDate = localStorage.getItem(STORAGE_KEYS.CURRENT_DATE);
-        if (storedDate) {
-          dispatch({ type: ActionTypes.SET_CURRENT_DATE, payload: storedDate });
-        }
-      } catch (error) {
-        console.error("Failed to load stored data:", error);
-        dispatch({
-          type: ActionTypes.SET_ERROR,
-          payload: "Failed to load stored data",
-        });
-      } finally {
-        dispatch({ type: ActionTypes.SET_LOADING, payload: false });
-      }
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
     };
-
-    loadStoredData();
   }, []);
 
-  // Save data to localStorage whenever it changes
+  // Load initial data when user is authenticated
   useEffect(() => {
-    try {
-      localStorage.setItem(
-        STORAGE_KEYS.DAILY_DATA,
-        JSON.stringify(state.dailyData),
-      );
-    } catch (error) {
-      console.error("Failed to save daily data:", error);
+    if (isAuthenticated && user) {
+      loadInitialData();
     }
-  }, [state.dailyData]);
+  }, [isAuthenticated, user]);
 
-  useEffect(() => {
-    try {
-      localStorage.setItem(
-        STORAGE_KEYS.SETTINGS,
-        JSON.stringify(state.settings),
-      );
-    } catch (error) {
-      console.error("Failed to save settings:", error);
-    }
-  }, [state.settings]);
+  // Load initial data from API
+  const loadInitialData = async () => {
+    dispatch({ type: ActionTypes.SET_LOADING, payload: true });
+    dispatch({ type: ActionTypes.SET_SYNC_STATUS, payload: 'syncing' });
 
-  useEffect(() => {
     try {
-      localStorage.setItem(STORAGE_KEYS.CURRENT_DATE, state.currentDate);
+      // Load transactions for current month
+      const startOfMonth = new Date(state.currentDate);
+      startOfMonth.setDate(1);
+      const endOfMonth = new Date(state.currentDate);
+      endOfMonth.setMonth(endOfMonth.getMonth() + 1);
+      endOfMonth.setDate(0);
+
+      const [transactionsResponse, settingsResponse] = await Promise.all([
+        transactionsAPI.getByDateRange(
+          startOfMonth.toISOString().split('T')[0],
+          endOfMonth.toISOString().split('T')[0]
+        ),
+        settingsAPI.get().catch(() => ({ data: state.settings }))
+      ]);
+
+      // Process transactions into daily data structure
+      const dailyData = {};
+      transactionsResponse.data.forEach(transaction => {
+        const date = transaction.date;
+        if (!dailyData[date]) {
+          dailyData[date] = { income: [], expenses: [] };
+        }
+        if (transaction.type === 'income') {
+          dailyData[date].income.push(transaction);
+        } else {
+          dailyData[date].expenses.push(transaction);
+        }
+      });
+
+      dispatch({
+        type: ActionTypes.BULK_UPDATE, payload: {
+          dailyData,
+          settings: settingsResponse.data,
+          syncStatus: 'synced'
+        }
+      });
+
     } catch (error) {
-      console.error("Failed to save current date:", error);
+      const errorResult = apiHelpers.handleError(error);
+      dispatch({ type: ActionTypes.SET_ERROR, payload: errorResult.error });
+      dispatch({ type: ActionTypes.SET_SYNC_STATUS, payload: 'error' });
+    } finally {
+      dispatch({ type: ActionTypes.SET_LOADING, payload: false });
     }
-  }, [state.currentDate]);
+  };
+
+  // Sync data when coming back online
+  useEffect(() => {
+    if (state.isOnline && state.syncStatus === 'offline' && isAuthenticated) {
+      loadInitialData();
+    }
+  }, [state.isOnline, isAuthenticated]);
 
   // Action creators
   const actions = {
     setCurrentDate: (date) => {
       dispatch({ type: ActionTypes.SET_CURRENT_DATE, payload: date });
+      // Load data for new month if needed
+      if (new Date(date).getMonth() !== new Date(state.currentDate).getMonth()) {
+        loadInitialData();
+      }
     },
 
-    addIncome: (date, incomeData) => {
-      try {
-        const validation = validateTransaction(incomeData, "income");
-        if (!validation.isValid) {
-          throw new Error(validation.errors.join(", "));
-        }
+    addIncome: async (date, incomeData) => {
+      if (!state.isOnline) {
+        return { success: false, error: "Cannot add transactions while offline" };
+      }
 
-        const income = {
-          id: Date.now() + Math.random(),
+      dispatch({ type: ActionTypes.SET_LOADING, payload: true });
+
+      try {
+        const transactionData = {
           ...incomeData,
+          type: 'income',
+          date,
           amount: parseFloat(incomeData.amount),
-          time: new Date().toLocaleTimeString("en-IN", {
-            hour: "2-digit",
-            minute: "2-digit",
-          }),
-          createdAt: new Date().toISOString(),
         };
 
+        const response = await transactionsAPI.create(transactionData);
+        const transaction = response.data;
+
         dispatch({
-          type: ActionTypes.ADD_INCOME,
-          payload: { date, income },
+          type: ActionTypes.ADD_TRANSACTION,
+          payload: { date, transaction }
         });
 
-        return { success: true, data: income };
+        return { success: true, data: transaction };
       } catch (error) {
-        dispatch({ type: ActionTypes.SET_ERROR, payload: error.message });
-        return { success: false, error: error.message };
+        const errorResult = apiHelpers.handleError(error);
+        dispatch({ type: ActionTypes.SET_ERROR, payload: errorResult.error });
+        return errorResult;
+      } finally {
+        dispatch({ type: ActionTypes.SET_LOADING, payload: false });
       }
     },
 
-    addExpense: (date, expenseData) => {
-      try {
-        const validation = validateTransaction(expenseData, "expense");
-        if (!validation.isValid) {
-          throw new Error(validation.errors.join(", "));
-        }
+    addExpense: async (date, expenseData) => {
+      if (!state.isOnline) {
+        return { success: false, error: "Cannot add transactions while offline" };
+      }
 
-        const expense = {
-          id: Date.now() + Math.random(),
+      dispatch({ type: ActionTypes.SET_LOADING, payload: true });
+
+      try {
+        const transactionData = {
           ...expenseData,
+          type: 'expense',
+          date,
           amount: parseFloat(expenseData.amount),
-          time: new Date().toLocaleTimeString("en-IN", {
-            hour: "2-digit",
-            minute: "2-digit",
-          }),
-          createdAt: new Date().toISOString(),
         };
 
+        const response = await transactionsAPI.create(transactionData);
+        const transaction = response.data;
+
         dispatch({
-          type: ActionTypes.ADD_EXPENSE,
-          payload: { date, expense },
+          type: ActionTypes.ADD_TRANSACTION,
+          payload: { date, transaction }
         });
 
-        return { success: true, data: expense };
+        return { success: true, data: transaction };
       } catch (error) {
-        dispatch({ type: ActionTypes.SET_ERROR, payload: error.message });
-        return { success: false, error: error.message };
+        const errorResult = apiHelpers.handleError(error);
+        dispatch({ type: ActionTypes.SET_ERROR, payload: errorResult.error });
+        return errorResult;
+      } finally {
+        dispatch({ type: ActionTypes.SET_LOADING, payload: false });
       }
     },
 
-    deleteTransaction: (date, transactionId, transactionType) => {
-      try {
-        dispatch({
-          type: ActionTypes.DELETE_TRANSACTION,
-          payload: { date, transactionId, transactionType },
-        });
-        return { success: true };
-      } catch (error) {
-        dispatch({ type: ActionTypes.SET_ERROR, payload: error.message });
-        return { success: false, error: error.message };
+    updateTransaction: async (transactionId, updatedData) => {
+      if (!state.isOnline) {
+        return { success: false, error: "Cannot update transactions while offline" };
       }
-    },
 
-    updateTransaction: (date, transactionId, transactionType, updatedData) => {
+      dispatch({ type: ActionTypes.SET_LOADING, payload: true });
+
       try {
-        const validation = validateTransaction(
-          updatedData,
-          transactionType.slice(0, -1),
-        );
-        if (!validation.isValid) {
-          throw new Error(validation.errors.join(", "));
-        }
+        const response = await transactionsAPI.update(transactionId, updatedData);
+        const updatedTransaction = response.data;
 
         dispatch({
           type: ActionTypes.UPDATE_TRANSACTION,
           payload: {
-            date,
+            date: updatedTransaction.date,
             transactionId,
-            transactionType,
-            updatedData: {
-              ...updatedData,
-              amount: parseFloat(updatedData.amount),
-              updatedAt: new Date().toISOString(),
-            },
-          },
-        });
-
-        return { success: true };
-      } catch (error) {
-        dispatch({ type: ActionTypes.SET_ERROR, payload: error.message });
-        return { success: false, error: error.message };
-      }
-    },
-
-    clearDayData: (date) => {
-      if (
-        window.confirm(
-          "Are you sure you want to clear all transactions for this date? This action cannot be undone.",
-        )
-      ) {
-        dispatch({ type: ActionTypes.CLEAR_DAY_DATA, payload: { date } });
-        return { success: true };
-      }
-      return { success: false, error: "Operation cancelled" };
-    },
-
-    exportData: () => {
-      try {
-        const exportData = {
-          dailyData: state.dailyData,
-          settings: state.settings,
-          exportDate: new Date().toISOString(),
-          version: "1.0.0",
-        };
-
-        const dataStr = JSON.stringify(exportData, null, 2);
-        const dataUri =
-          "data:application/json;charset=utf-8," + encodeURIComponent(dataStr);
-
-        const exportFileDefaultName = `expense-tracker-backup-${new Date().toISOString().split("T")[0]}.json`;
-
-        const linkElement = document.createElement("a");
-        linkElement.setAttribute("href", dataUri);
-        linkElement.setAttribute("download", exportFileDefaultName);
-        linkElement.click();
-
-        dispatch({
-          type: ActionTypes.SET_LAST_BACKUP,
-          payload: new Date().toISOString(),
-        });
-
-        return { success: true };
-      } catch (error) {
-        dispatch({
-          type: ActionTypes.SET_ERROR,
-          payload: "Failed to export data",
-        });
-        return { success: false, error: "Failed to export data" };
-      }
-    },
-
-    importData: (fileData) => {
-      try {
-        const parsedData = JSON.parse(fileData);
-
-        // Validate data structure
-        if (!parsedData.dailyData || typeof parsedData.dailyData !== "object") {
-          throw new Error("Invalid data format");
-        }
-
-        if (
-          window.confirm(
-            "This will replace all existing data. Are you sure you want to continue?",
-          )
-        ) {
-          dispatch({
-            type: ActionTypes.IMPORT_DATA,
-            payload: parsedData.dailyData,
-          });
-
-          if (parsedData.settings) {
-            dispatch({
-              type: ActionTypes.UPDATE_SETTINGS,
-              payload: parsedData.settings,
-            });
+            updatedTransaction
           }
-
-          return { success: true };
-        }
-
-        return { success: false, error: "Import cancelled" };
-      } catch (error) {
-        dispatch({
-          type: ActionTypes.SET_ERROR,
-          payload: "Failed to import data. Please check file format.",
         });
-        return { success: false, error: "Failed to import data" };
+
+        return { success: true, data: updatedTransaction };
+      } catch (error) {
+        const errorResult = apiHelpers.handleError(error);
+        dispatch({ type: ActionTypes.SET_ERROR, payload: errorResult.error });
+        return errorResult;
+      } finally {
+        dispatch({ type: ActionTypes.SET_LOADING, payload: false });
       }
     },
 
-    updateSettings: (newSettings) => {
-      dispatch({ type: ActionTypes.UPDATE_SETTINGS, payload: newSettings });
+    deleteTransaction: async (transactionId, date) => {
+      if (!state.isOnline) {
+        return { success: false, error: "Cannot delete transactions while offline" };
+      }
+
+      dispatch({ type: ActionTypes.SET_LOADING, payload: true });
+
+      try {
+        await transactionsAPI.delete(transactionId);
+
+        dispatch({
+          type: ActionTypes.DELETE_TRANSACTION,
+          payload: { date, transactionId }
+        });
+
+        return { success: true };
+      } catch (error) {
+        const errorResult = apiHelpers.handleError(error);
+        dispatch({ type: ActionTypes.SET_ERROR, payload: errorResult.error });
+        return errorResult;
+      } finally {
+        dispatch({ type: ActionTypes.SET_LOADING, payload: false });
+      }
     },
 
-    clearError: () => {
-      dispatch({ type: ActionTypes.CLEAR_ERROR });
+    updateSettings: async (newSettings) => {
+      const updatedSettings = { ...state.settings, ...newSettings };
+
+      // Update local state immediately
+      dispatch({ type: ActionTypes.SET_SETTINGS, payload: updatedSettings });
+
+      if (state.isOnline) {
+        try {
+          await settingsAPI.update(updatedSettings);
+          return { success: true };
+        } catch (error) {
+          // Revert on error
+          dispatch({ type: ActionTypes.SET_SETTINGS, payload: state.settings });
+          const errorResult = apiHelpers.handleError(error);
+          dispatch({ type: ActionTypes.SET_ERROR, payload: errorResult.error });
+          return errorResult;
+        }
+      }
+
+      return { success: true, warning: "Settings saved locally. Will sync when online." };
     },
 
     calculateDayStats: (date) => {
       const dayData = state.dailyData[date] || { income: [], expenses: [] };
-      const totalIncome = dayData.income.reduce(
-        (sum, item) => sum + item.amount,
-        0,
-      );
-      const totalExpenses = dayData.expenses.reduce(
-        (sum, item) => sum + item.amount,
-        0,
-      );
+      const totalIncome = dayData.income.reduce((sum, item) => sum + item.amount, 0);
+      const totalExpenses = dayData.expenses.reduce((sum, item) => sum + item.amount, 0);
       const balance = totalIncome - totalExpenses;
       const transactionCount = dayData.income.length + dayData.expenses.length;
 
       // Category breakdown
       const categoryTotals = {};
       dayData.expenses.forEach((expense) => {
-        categoryTotals[expense.category] =
-          (categoryTotals[expense.category] || 0) + expense.amount;
+        categoryTotals[expense.category] = (categoryTotals[expense.category] || 0) + expense.amount;
       });
 
       return {
@@ -511,7 +392,6 @@ export function ExpenseProvider({ children }) {
       let activeDays = 0;
       const dailyStats = [];
 
-      // Calculate for each day of the month
       for (let day = 1; day <= daysInMonth; day++) {
         const dateStr = `${currentYear}-${String(currentMonth + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
         const dayStats = actions.calculateDayStats(dateStr);
@@ -542,11 +422,48 @@ export function ExpenseProvider({ children }) {
         dailyStats,
       };
     },
+
+    clearError: () => {
+      dispatch({ type: ActionTypes.CLEAR_ERROR });
+    },
+
+    refreshData: () => {
+      if (isAuthenticated && state.isOnline) {
+        return loadInitialData();
+      }
+      return Promise.resolve();
+    },
+
+    // Bulk operations
+    bulkDeleteTransactions: async (transactionIds) => {
+      if (!state.isOnline) {
+        return { success: false, error: "Cannot delete transactions while offline" };
+      }
+
+      dispatch({ type: ActionTypes.SET_LOADING, payload: true });
+
+      try {
+        await transactionsAPI.bulkDelete(transactionIds);
+
+        // Refresh data to get updated state
+        await loadInitialData();
+
+        return { success: true, message: `Deleted ${transactionIds.length} transactions` };
+      } catch (error) {
+        const errorResult = apiHelpers.handleError(error);
+        dispatch({ type: ActionTypes.SET_ERROR, payload: errorResult.error });
+        return errorResult;
+      } finally {
+        dispatch({ type: ActionTypes.SET_LOADING, payload: false });
+      }
+    },
   };
 
   const contextValue = {
     ...state,
     ...actions,
+    isAuthenticated,
+    user,
   };
 
   return (

@@ -1,10 +1,13 @@
+// src/App.jsx
 import React, { useState, useEffect } from "react";
+import { AuthProvider, useAuth } from "./context/AuthContext";
 import { ExpenseProvider } from "./context/ExpenseContext";
 import { NotificationProvider } from "./hooks/useNotifications";
-import { useExpenseData } from "./hooks/useExpenseData";
-import { useNotifications } from "./hooks/useNotifications";
+import LoginForm from "./components/auth/LoginForm";
+import RegisterForm from "./components/auth/RegisterForm";
+import LoadingSpinner from "./components/common/LoadingSpinner";
 
-// Component imports
+// Main app components (existing)
 import Header from "./components/common/Header";
 import MobileMenu from "./components/common/MobileMenu";
 import Notifications from "./components/common/Notifications";
@@ -14,7 +17,42 @@ import QuickActions from "./components/dashboard/QuickActions";
 import TransactionList from "./components/transactions/TransactionList";
 import Charts from "./components/analytics/Charts";
 import BudgetOverview from "./components/budget/BudgetOverview";
-import LoadingSpinner from "./components/common/LoadingSpinner";
+
+// Authentication wrapper component
+const AuthWrapper = ({ children }) => {
+  const { isAuthenticated, isLoading } = useAuth();
+  const [authMode, setAuthMode] = useState('login'); // 'login' or 'register'
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50 flex items-center justify-center">
+        <div className="text-center">
+          <LoadingSpinner size="xl" />
+          <h2 className="mt-4 text-2xl font-semibold text-gray-700">
+            Loading ExpenseFlow...
+          </h2>
+          <p className="mt-2 text-gray-500">
+            Checking your authentication status
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!isAuthenticated) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50 flex items-center justify-center p-4">
+        {authMode === 'login' ? (
+          <LoginForm onSwitchToRegister={() => setAuthMode('register')} />
+        ) : (
+          <RegisterForm onSwitchToLogin={() => setAuthMode('login')} />
+        )}
+      </div>
+    );
+  }
+
+  return children;
+};
 
 // Navigation configuration
 const NAV_ITEMS = [
@@ -44,57 +82,182 @@ const NAV_ITEMS = [
   },
 ];
 
+// Enhanced Expense Data Hook with API integration
+const useExpenseDataWithAPI = (currentDate) => {
+  const { apiCall } = useAuth();
+  const [dailyData, setDailyData] = useState({});
+  const [calculations, setCalculations] = useState({
+    totalIncome: 0,
+    totalExpenses: 0,
+    balance: 0,
+    transactionCount: 0,
+    categoryTotals: {},
+  });
+  const [isLoading, setIsLoading] = useState(false);
+
+  // Fetch transactions from API
+  const fetchTransactions = async (date) => {
+    try {
+      setIsLoading(true);
+      const response = await apiCall(`/api/transactions?date=${date}`);
+      
+      // Transform API data to match existing format
+      const transformedData = {
+        income: response.transactions
+          .filter(t => t.type === 'income')
+          .map(t => ({
+            id: t.id,
+            source: t.source,
+            amount: parseFloat(t.amount),
+            time: new Date(t.created_at).toLocaleTimeString('en-IN', {
+              hour: '2-digit',
+              minute: '2-digit',
+            }),
+            createdAt: t.created_at,
+          })),
+        expenses: response.transactions
+          .filter(t => t.type === 'expense')
+          .map(t => ({
+            id: t.id,
+            description: t.description,
+            category: t.category,
+            amount: parseFloat(t.amount),
+            time: new Date(t.created_at).toLocaleTimeString('en-IN', {
+              hour: '2-digit',
+              minute: '2-digit',
+            }),
+            createdAt: t.created_at,
+          })),
+      };
+
+      setDailyData(prev => ({ ...prev, [date]: transformedData }));
+      calculateStats(transformedData);
+    } catch (error) {
+      console.error('Failed to fetch transactions:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Calculate statistics
+  const calculateStats = (data) => {
+    const totalIncome = data.income.reduce((sum, item) => sum + item.amount, 0);
+    const totalExpenses = data.expenses.reduce((sum, item) => sum + item.amount, 0);
+    const balance = totalIncome - totalExpenses;
+    const transactionCount = data.income.length + data.expenses.length;
+    
+    const categoryTotals = {};
+    data.expenses.forEach(expense => {
+      categoryTotals[expense.category] = (categoryTotals[expense.category] || 0) + expense.amount;
+    });
+
+    setCalculations({
+      totalIncome,
+      totalExpenses,
+      balance,
+      transactionCount,
+      categoryTotals,
+    });
+  };
+
+  // Add income
+  const addIncome = async (incomeData) => {
+    try {
+      const response = await apiCall('/api/transactions', {
+        method: 'POST',
+        body: JSON.stringify({
+          type: 'income',
+          source: incomeData.source,
+          amount: parseFloat(incomeData.amount),
+          transaction_date: currentDate,
+        }),
+      });
+
+      // Refresh data
+      await fetchTransactions(currentDate);
+      
+      return { success: true, data: response.transaction };
+    } catch (error) {
+      return { success: false, error: error.message };
+    }
+  };
+
+  // Add expense
+  const addExpense = async (expenseData) => {
+    try {
+      const response = await apiCall('/api/transactions', {
+        method: 'POST',
+        body: JSON.stringify({
+          type: 'expense',
+          description: expenseData.description,
+          category: expenseData.category,
+          amount: parseFloat(expenseData.amount),
+          transaction_date: currentDate,
+        }),
+      });
+
+      // Refresh data
+      await fetchTransactions(currentDate);
+      
+      return { success: true, data: response.transaction };
+    } catch (error) {
+      return { success: false, error: error.message };
+    }
+  };
+
+  // Delete transaction
+  const deleteTransaction = async (transactionId) => {
+    try {
+      await apiCall(`/api/transactions/${transactionId}`, {
+        method: 'DELETE',
+      });
+
+      // Refresh data
+      await fetchTransactions(currentDate);
+      
+      return { success: true };
+    } catch (error) {
+      return { success: false, error: error.message };
+    }
+  };
+
+  // Fetch data when date changes
+  useEffect(() => {
+    if (currentDate) {
+      fetchTransactions(currentDate);
+    }
+  }, [currentDate]);
+
+  return {
+    dailyData,
+    calculations,
+    addIncome,
+    addExpense,
+    deleteTransaction,
+    isLoading,
+    currentDayData: dailyData[currentDate] || { income: [], expenses: [] },
+  };
+};
+
+// Main App Content Component
 const AppContent = () => {
-  // State management
+  const { user, logout } = useAuth();
   const [activeTab, setActiveTab] = useState("dashboard");
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
   const [currentDate, setCurrentDate] = useState(
-    new Date().toISOString().split("T")[0],
+    new Date().toISOString().split("T")[0]
   );
 
-  // Custom hooks
-  const { dailyData, addIncome, addExpense, deleteTransaction, calculations } =
-    useExpenseData(currentDate);
-
-  const { notifications } = useNotifications();
-
-  // Handle app initialization
-  useEffect(() => {
-    const initializeApp = async () => {
-      try {
-        // Simulate app initialization (loading saved data, etc.)
-        await new Promise((resolve) => setTimeout(resolve, 1000));
-
-        // Check for saved preferences
-        const savedTab = localStorage.getItem("expense-tracker-active-tab");
-        if (savedTab && NAV_ITEMS.find((item) => item.id === savedTab)) {
-          setActiveTab(savedTab);
-        }
-
-        const savedDate = localStorage.getItem("expense-tracker-current-date");
-        if (savedDate) {
-          setCurrentDate(savedDate);
-        }
-
-        setIsLoading(false);
-      } catch (error) {
-        console.error("Failed to initialize app:", error);
-        setIsLoading(false);
-      }
-    };
-
-    initializeApp();
-  }, []);
-
-  // Save preferences when they change
-  useEffect(() => {
-    localStorage.setItem("expense-tracker-active-tab", activeTab);
-  }, [activeTab]);
-
-  useEffect(() => {
-    localStorage.setItem("expense-tracker-current-date", currentDate);
-  }, [currentDate]);
+  // Use enhanced expense data hook
+  const {
+    dailyData,
+    calculations,
+    addIncome,
+    addExpense,
+    deleteTransaction,
+    isLoading,
+    currentDayData,
+  } = useExpenseDataWithAPI(currentDate);
 
   // Handle tab switching
   const handleTabChange = (tabId) => {
@@ -137,7 +300,6 @@ const AppContent = () => {
         }
       }
 
-      // Escape key to close mobile menu
       if (event.key === "Escape" && isMobileMenuOpen) {
         setIsMobileMenuOpen(false);
       }
@@ -147,26 +309,15 @@ const AppContent = () => {
     return () => document.removeEventListener("keydown", handleKeyDown);
   }, [isMobileMenuOpen]);
 
-  // Render loading screen
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50 flex items-center justify-center">
-        <div className="text-center">
-          <LoadingSpinner size="lg" />
-          <h2 className="mt-4 text-xl font-semibold text-gray-700">
-            Loading ExpenseFlow...
-          </h2>
-          <p className="mt-2 text-gray-500">
-            Preparing your financial dashboard
-          </p>
-        </div>
-      </div>
-    );
-  }
-
   // Render tab content
   const renderTabContent = () => {
-    const currentData = dailyData[currentDate] || { income: [], expenses: [] };
+    if (isLoading) {
+      return (
+        <div className="flex items-center justify-center py-16">
+          <LoadingSpinner size="lg" />
+        </div>
+      );
+    }
 
     switch (activeTab) {
       case "dashboard":
@@ -186,15 +337,15 @@ const AppContent = () => {
             <TransactionList
               type="income"
               title="Income Transactions"
-              data={currentData.income}
-              onDelete={(id) => deleteTransaction(id, "income")}
+              data={currentDayData.income}
+              onDelete={(id) => deleteTransaction(id)}
               emptyMessage="No income recorded for this date"
             />
             <TransactionList
               type="expenses"
               title="Expense Transactions"
-              data={currentData.expenses}
-              onDelete={(id) => deleteTransaction(id, "expenses")}
+              data={currentDayData.expenses}
+              onDelete={(id) => deleteTransaction(id)}
               emptyMessage="No expenses recorded for this date"
             />
           </div>
@@ -246,6 +397,8 @@ const AppContent = () => {
         navItems={NAV_ITEMS}
         activeTab={activeTab}
         onTabChange={handleTabChange}
+        user={user}
+        onLogout={logout}
       />
 
       {/* Header */}
@@ -254,10 +407,9 @@ const AppContent = () => {
         onTabChange={handleTabChange}
         onMobileMenuToggle={toggleMobileMenu}
         navItems={NAV_ITEMS}
+        user={user}
+        onLogout={logout}
       />
-
-      {/* Notifications */}
-      <Notifications notifications={notifications} />
 
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -269,7 +421,7 @@ const AppContent = () => {
         />
 
         {/* Tab Content */}
-        <div className="animate-fade-in">{renderTabContent()}</div>
+        <div className="animate-fade-in mt-8">{renderTabContent()}</div>
       </main>
 
       {/* Footer */}
@@ -291,29 +443,9 @@ const AppContent = () => {
                 Track expenses, manage budgets, and visualize your financial
                 data with ease.
               </p>
-              <div className="flex space-x-4">
-                <a
-                  href="#"
-                  className="text-gray-400 hover:text-indigo-600 transition-colors"
-                >
-                  <span className="sr-only">Twitter</span>
-                  🐦
-                </a>
-                <a
-                  href="#"
-                  className="text-gray-400 hover:text-indigo-600 transition-colors"
-                >
-                  <span className="sr-only">GitHub</span>
-                  🐙
-                </a>
-                <a
-                  href="#"
-                  className="text-gray-400 hover:text-indigo-600 transition-colors"
-                >
-                  <span className="sr-only">LinkedIn</span>
-                  💼
-                </a>
-              </div>
+              <p className="text-sm text-gray-500">
+                Logged in as: <strong>{user?.name}</strong> ({user?.email})
+              </p>
             </div>
 
             {/* Features */}
@@ -327,46 +459,38 @@ const AppContent = () => {
                 <li>Data Visualization</li>
                 <li>Monthly Reports</li>
                 <li>Category Analysis</li>
+                <li>Data Sync & Backup</li>
               </ul>
             </div>
 
-            {/* Support */}
+            {/* Account */}
             <div>
               <h3 className="text-sm font-semibold text-gray-900 tracking-wider uppercase mb-4">
-                Support
+                Account
               </h3>
               <ul className="space-y-2 text-sm text-gray-600">
                 <li>
-                  <a
-                    href="#"
-                    className="hover:text-indigo-600 transition-colors"
-                  >
-                    Help Center
-                  </a>
+                  <button className="hover:text-indigo-600 transition-colors">
+                    Profile Settings
+                  </button>
                 </li>
                 <li>
-                  <a
-                    href="#"
-                    className="hover:text-indigo-600 transition-colors"
-                  >
-                    Privacy Policy
-                  </a>
+                  <button className="hover:text-indigo-600 transition-colors">
+                    Export Data
+                  </button>
                 </li>
                 <li>
-                  <a
-                    href="#"
-                    className="hover:text-indigo-600 transition-colors"
-                  >
-                    Terms of Service
-                  </a>
+                  <button className="hover:text-indigo-600 transition-colors">
+                    Import Data
+                  </button>
                 </li>
                 <li>
-                  <a
-                    href="#"
+                  <button 
+                    onClick={logout}
                     className="hover:text-indigo-600 transition-colors"
                   >
-                    Contact Us
-                  </a>
+                    Sign Out
+                  </button>
                 </li>
               </ul>
             </div>
@@ -379,7 +503,9 @@ const AppContent = () => {
                 © 2024 ExpenseFlow. All rights reserved.
               </p>
               <div className="mt-4 md:mt-0 flex items-center space-x-6 text-sm text-gray-600">
-                <span>Built with React & Tailwind CSS</span>
+                <span>Built with React & Node.js</span>
+                <span>•</span>
+                <span>Dockerized for TrueNAS</span>
                 <span>•</span>
                 <span>v1.0.0</span>
               </div>
@@ -391,13 +517,17 @@ const AppContent = () => {
   );
 };
 
-// Main App Component with Providers
+// Main App Component with All Providers
 const App = () => {
   return (
     <NotificationProvider>
-      <ExpenseProvider>
-        <AppContent />
-      </ExpenseProvider>
+      <AuthProvider>
+        <AuthWrapper>
+          <ExpenseProvider>
+            <AppContent />
+          </ExpenseProvider>
+        </AuthWrapper>
+      </AuthProvider>
     </NotificationProvider>
   );
 };

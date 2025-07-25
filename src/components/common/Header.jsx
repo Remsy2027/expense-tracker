@@ -31,60 +31,46 @@ const Header = ({
   };
 
   return (
-    <header className="bg-gradient-to-r from-indigo-600 via-purple-600 to-indigo-700 text-white shadow-xl relative overflow-hidden">
-      {/* Background Pattern */}
-      <div className="absolute inset-0 opacity-10">
-        <div
-          className="absolute inset-0"
-          style={{
-            backgroundImage: `radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.3) 0%, transparent 50%),
-                           radial-gradient(circle at 80% 20%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
-                           radial-gradient(circle at 40% 40%, rgba(120, 119, 198, 0.2) 0%, transparent 50%)`,
-          }}
-        />
-      </div>
-
-      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <header className="sticky top-0 z-40 bg-white/80 backdrop-blur-xl border-b border-gray-100">
+      <div className="max-w-6xl mx-auto px-6">
         <div className="flex items-center justify-between h-16">
           {/* Left side - Logo and Mobile Menu */}
           <div className="flex items-center space-x-4">
             {/* Mobile menu button */}
             <button
               onClick={onMobileMenuToggle}
-              className="lg:hidden p-2 rounded-lg hover:bg-white/10 transition-colors"
+              className="lg:hidden w-10 h-10 rounded-xl bg-gray-100 flex items-center justify-center hover:bg-gray-200 transition-colors"
               aria-label="Open mobile menu"
             >
-              <Menu className="h-6 w-6" />
+              <Menu className="h-5 h-5 text-gray-600" />
             </button>
 
-            {/* Logo */}
+            {/* Clean Logo */}
             <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center border border-white/20">
-                <TrendingUp className="h-6 w-6 text-white" />
+              <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl flex items-center justify-center shadow-sm">
+                <TrendingUp className="h-5 h-5 text-white" />
               </div>
               <div className="hidden sm:block">
-                <h1 className="text-xl font-bold tracking-tight">
-                  ExpenseFlow
-                </h1>
-                <p className="text-xs text-white/80 hidden md:block">
-                  Personal Finance Tracker
+                <h1 className="text-xl font-bold text-gray-900">ExpenseFlow</h1>
+                <p className="text-xs text-gray-500 hidden md:block">
+                  Personal Finance
                 </p>
               </div>
             </div>
           </div>
 
-          {/* Center - Desktop Navigation */}
-          <nav className="hidden lg:flex items-center space-x-1">
+          {/* Center - Clean Desktop Navigation */}
+          <nav className="hidden lg:flex items-center space-x-2">
             {navItems.map((item) => {
               const IconComponent = getIconComponent(item.icon);
               return (
                 <button
                   key={item.id}
                   onClick={() => onTabChange(item.id)}
-                  className={`flex items-center space-x-2 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
+                  className={`flex items-center space-x-2 px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200 ${
                     activeTab === item.id
-                      ? "bg-white/20 text-white shadow-lg backdrop-blur-sm border border-white/20"
-                      : "text-white/80 hover:text-white hover:bg-white/10"
+                      ? "bg-blue-100 text-blue-700"
+                      : "text-gray-600 hover:text-gray-900 hover:bg-gray-100"
                   }`}
                   aria-label={`Navigate to ${item.label}`}
                 >
@@ -95,69 +81,65 @@ const Header = ({
             })}
           </nav>
 
-          {/* Right side - User Actions */}
+          {/* Right side - Clean User Actions */}
           <div className="flex items-center space-x-3">
             {/* Notifications */}
-            <div className="relative">
-              <button
-                className="p-2 rounded-lg hover:bg-white/10 transition-colors relative"
-                aria-label="Notifications"
-              >
-                <Bell className="h-5 w-5" />
-                {notifications.length > 0 && (
-                  <span className="absolute -top-1 -right-1 h-4 w-4 bg-red-500 rounded-full flex items-center justify-center text-xs font-medium">
-                    {notifications.length > 9 ? "9+" : notifications.length}
-                  </span>
-                )}
-              </button>
-            </div>
-
-            {/* User Menu */}
-            <div className="relative">
-              <button
-                className="flex items-center space-x-2 p-2 rounded-lg hover:bg-white/10 transition-colors"
-                aria-label="User menu"
-              >
-                {user?.avatar ? (
-                  <img
-                    src={user.avatar}
-                    alt={user.name}
-                    className="h-6 w-6 rounded-full border border-white/20"
-                  />
-                ) : (
-                  <div className="h-6 w-6 bg-white/20 rounded-full flex items-center justify-center border border-white/20">
-                    <User className="h-4 w-4" />
-                  </div>
-                )}
-                <span className="hidden md:block text-sm font-medium">
-                  {user?.name || "User"}
+            <button
+              className="relative w-10 h-10 rounded-xl bg-gray-100 flex items-center justify-center hover:bg-gray-200 transition-colors"
+              aria-label="Notifications"
+            >
+              <Bell className="h-5 h-5 text-gray-600" />
+              {notifications.length > 0 && (
+                <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 rounded-full flex items-center justify-center text-xs font-medium text-white">
+                  {notifications.length > 9 ? "9+" : notifications.length}
                 </span>
-              </button>
-            </div>
+              )}
+            </button>
 
             {/* Settings */}
             <button
-              className="p-2 rounded-lg hover:bg-white/10 transition-colors"
+              className="w-10 h-10 rounded-xl bg-gray-100 flex items-center justify-center hover:bg-gray-200 transition-colors"
               aria-label="Settings"
             >
-              <Settings className="h-5 w-5" />
+              <Settings className="h-5 h-5 text-gray-600" />
+            </button>
+
+            {/* User Menu */}
+            <button
+              className="flex items-center space-x-2 p-2 rounded-xl hover:bg-gray-100 transition-colors"
+              aria-label="User menu"
+            >
+              {user?.avatar ? (
+                <img
+                  src={user.avatar}
+                  alt={user.name}
+                  className="h-8 w-8 rounded-xl"
+                />
+              ) : (
+                <div className="h-8 w-8 bg-gradient-to-br from-green-400 to-blue-500 rounded-xl flex items-center justify-center">
+                  <User className="h-4 w-4 text-white" />
+                </div>
+              )}
+              <span className="hidden md:block text-sm font-medium text-gray-900">
+                {user?.name || "User"}
+              </span>
             </button>
           </div>
         </div>
 
-        {/* Mobile Navigation - Visible on smaller screens */}
-        <div className="lg:hidden border-t border-white/20 py-3">
-          <div className="flex items-center justify-between overflow-x-auto scrollbar-hide">
+        {/* Clean Mobile Navigation */}
+        <div className="lg:hidden border-t border-gray-100 py-3">
+          <div className="flex items-center justify-between overflow-x-auto">
             {navItems.map((item) => {
               const IconComponent = getIconComponent(item.icon);
               return (
                 <button
                   key={item.id}
                   onClick={() => onTabChange(item.id)}
-                  className={`flex flex-col items-center space-y-1 px-3 py-2 rounded-lg text-xs font-medium transition-all duration-200 min-w-0 flex-shrink-0 ${
+                  className={`flex flex-col items-center space-y-1 px-3 py-2 rounded-xl text-xs font-medium transition-all duration-200 min-w-0 flex-shrink-0 ${
                     activeTab === item.id
-                      ? "bg-white/20 text-white"
-                      : "text-white/70 hover:text-white hover:bg-white/10"
+                      ? "bg-blue-100 text-blue-700"
+                      : "text-gray-600 hover:text-gray-900 hover:bg-gray-100"
                   }`}
                   aria-label={`Navigate to ${item.label}`}
                 >
@@ -166,26 +148,6 @@ const Header = ({
                 </button>
               );
             })}
-          </div>
-        </div>
-      </div>
-
-      {/* Active Tab Indicator for Desktop */}
-      <div className="hidden lg:block absolute bottom-0 left-0 right-0">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-center">
-            <div className="flex space-x-1">
-              {navItems.map((item) => (
-                <div
-                  key={item.id}
-                  className={`h-1 transition-all duration-300 ${
-                    activeTab === item.id
-                      ? "w-12 bg-white shadow-lg"
-                      : "w-6 bg-white/20"
-                  }`}
-                />
-              ))}
-            </div>
           </div>
         </div>
       </div>
